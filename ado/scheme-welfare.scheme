@@ -1,0 +1,58 @@
+
+* ------------------------------------------------------------------------------
+* STATA GRAPHING SCHEME FOR POLICY TEAM - OPPORTUNITY INSIGHTS
+* ------------------------------------------------------------------------------
+
+#include s2color
+
+* background color
+color 			background		white
+
+* graph size
+graphsize 		y 				5
+graphsize 		x 				8
+
+* legend options
+linestyle  		legend			none
+
+* order of colors
+color p1					navy
+color p2					maroon
+color p3					forest_green
+color p4					dkorange
+color p5					teal
+color p6					cranberry
+color p7					lavender
+color p8					khaki
+color p9					sienna
+color p10					emidblue
+color p11					emerald
+color p12					brown
+color p13					erose
+color p14					gold
+color p15					bluishgray
+
+* title options
+gsize 			heading 		vhuge
+
+* axis options
+color 			axis_title 		gs8
+gsize 			axis_title 		3.7
+color  			axisline		gs8
+gsize 			axis_title_gap	tiny
+linewidth 		axisline		medium
+
+* symbols
+symbolsize  	p 				medsmall
+linewidth		p				medthick
+
+* tick options
+color  			tick 			     gs8
+color  			tick_label     gs8
+gsize  			tick_label		3.7
+anglestyle  	vertical_tick 	0
+linewidth		tick			medium
+
+color         	key_label 		gs8
+
+margin 			graph			"2 2 5 7"
