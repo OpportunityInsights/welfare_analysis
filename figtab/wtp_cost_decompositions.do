@@ -15,7 +15,7 @@ local finalcolour = "${finalcolour}"
 
 *FIU Cost Decomposition:
 run_program fiu
-clear 
+clear
 set obs 10
 g xaxis = _n
 *DATA INPUT:
@@ -77,10 +77,10 @@ tw 	(bar cost xaxis if xaxis==1, barw(0.6) lcolor(%0) color("`red'")) /// initia
 	(scatter finish_cost xaxis if  xaxis==4, mlab(label) msym(none) mlabc("$tc") ///
 		mlabpos(12) mlabs(small)) ///
 	(scatter finish_cost xaxis if inrange(xaxis,2,3)|inrange(xaxis,5,6), mlab(label) msym(none) mlabc("$tc") ///
-		mlabpos(6) mlabs(small)) ///	
+		mlabpos(6) mlabs(small)) ///
 	(scatter finish_cost xshift in `items', mlab(finish_label) msym(none) mlabc("$tc") ///
 		mlabpos(6) mlabs(small)) ///
-	///(rcap l_cost u_cost xshift in `items', lcolor(gs7) ) /// 
+	///(rcap l_cost u_cost xshift in `items', lcolor(gs7) ) ///
 	(function y =0, lcolor(gs8%60) lwidth(thin) range(0.5 `=`items'+1.5')) ///
 	, ///
  	///yline(0, lcolor(gs8%50) lpattern(-)) ///
@@ -108,17 +108,16 @@ set obs 10
 gen xaxis = _n
 *DATA INPUT:
 	local program_cost = ${program_cost_fiu}
-	gen wtp = ${fiu_lbwtp} in 1 // "lower bound"
-	replace wtp = -${fiu_priv_cost} in 2 // private costs
-	replace wtp = ${fiu_short_post_tax}  in 3 // initial earnings loss
-	replace wtp = ${fiu_med_post_tax} in 4 // observed earnings gain
-	replace wtp = ${fiu_long_post_tax} in 5 // projected earnings gain
-	replace wtp = ${WTP_fiu} in 6 //total wtp
-	replace wtp = . in 7 // "lower bound"
+	gen wtp = -${fiu_priv_cost} in 1 // private costs
+	replace wtp = ${fiu_short_post_tax} in 2 // initial earnings loss
+	replace wtp = ${fiu_med_post_tax} in 3 // observed earnings gain
+	replace wtp = ${fiu_long_post_tax} in 4 // projected earnings gain
+	replace wtp = ${WTP_fiu} in 5 //total wtp
+	replace wtp = . in 6 // "lower bound"
 	replace wtp = wtp / 1000
 	g wtp2 = wtp
-	
-forval i = 3(1)5 {
+
+forval i = 2(1)5 {
 	replace wtp2 = wtp2 + wtp2[`i'-1] in `i'
 }
 
@@ -140,45 +139,39 @@ drop if wtp == .
 su xaxis
 gen need_ci = xaxis==r(max)
 g l_wtp = `fiu_l_wtp'/1000
-g u_wtp = `fiu_u_wtp'/1000 
+g u_wtp = `fiu_u_wtp'/1000
 su wtp2
-assert abs(`fiu_wtp'/1000 - r(max))<0.001
+//assert abs(`fiu_wtp'/1000 - r(max))<0.001
 
 gen label = "$"+ string(wtp, "%4.1f")+"K"
 
 replace xaxis = 0.8 in 1
 
-tw 	(scatter wtp xaxis if xaxis<1, mlab(label) mlabs(small) msym(none) mlabc("$tc") mlabpos(12)) /// lower bound
-	(bar wtp xaxis if xaxis<1, barwidth(0.6)  lcolor(%0) color("${finalcolour}"))  ///
-	(bar wtp xaxis if xaxis==6, barwidth(0.6)  lcolor(%0) color("${finalcolour}"))  ///
-	(bar wtp2 xaxis if wtp>=0 & inrange(xaxis,2,5), barwidth(0.6)  lcolor(%0) color("`blue'")) ///
-	(bar wtp2 xaxis if wtp<0 & inrange(xaxis,2,5), barwidth(0.6)  lcolor(%0) color("`red'")) ///
-	(bar white_out xaxis if inrange(xaxis,4,5), color(white) barwidth(0.6)) ///
+tw 	(scatter wtp xaxis if xaxis<1,  mlab(label) mlabs(small) msym(none) mlabc("$tc") mlabpos(6)) ///
+	(bar wtp xaxis if xaxis==5, barwidth(0.6)  lcolor(%0) color("${finalcolour}"))  ///
+	(bar wtp2 xaxis if wtp>=0 & inrange(xaxis,0,4), barwidth(0.6)  lcolor(%0) color("`blue'")) ///
+	(bar wtp2 xaxis if wtp<0 & inrange(xaxis,0,4), barwidth(0.6)  lcolor(%0) color("`red'")) ///
+	(bar white_out xaxis if inrange(xaxis,4,4), color(white) barwidth(0.6)) ///
 	(bar white_out xaxis if wtp<0, color(white) barwidth(0.6)) ///
-	(bar white_out xaxis if xaxis==4, color("${basecolour}")  lcolor(%0) barwidth(0.6)) ///
-	(scatter wtp2 xaxis if inrange(xaxis,4,5), mlab(label) mlabs(small) msym(none) mlabc("$tc") mlabpos(12)) ///
-	(scatter wtp2 xaxis if inrange(xaxis,2,3), mlab(label) mlabs(small) msym(none) mlabc("$tc") mlabpos(6)) ///
-	(scatter wtp xaxis if xaxis==6, mlab(label) mlabs(small) msym(none) mlabc("$tc") mlabpos(12)) ///
-	///(rcap l_wtp u_wtp xaxis if need_ci, lcolor(gs7) ) /// 
-	(function y =0, lcolor(gs8%60) lwidth(thin) range(0.3 `=6.5')) ///
+	(bar white_out xaxis if xaxis==3, color("${basecolour}")  lcolor(%0) barwidth(0.6)) ///
+	(scatter wtp2 xaxis if inrange(xaxis,3,4), mlab(label) mlabs(small) msym(none) mlabc("$tc") mlabpos(12)) ///
+	(scatter wtp2 xaxis if inrange(xaxis,1,2), mlab(label) mlabs(small) msym(none) mlabc("$tc") mlabpos(6)) ///
+	(scatter wtp xaxis if xaxis==5, mlab(label) mlabs(small) msym(none) mlabc("$tc") mlabpos(12)) ///
+	///(rcap l_wtp u_wtp xaxis if need_ci, lcolor(gs7) ) ///
+	(function y =0, lcolor(gs8%60) lwidth(thin) range(0.3 `=5.5')) ///
 	, ///
 	ylabel(-25 "-25K" 0 50 "50K" 100 "100K" , valuelabel) ///
 	legend(off) ytitle("WTP ($)") xtitle("")  ylabel(,nogrid notick) ///
 	xlabel( ///
-	2 `""Private tuition""payments""' ///
-	3 `""Age 19-25""after-tax" "earnings""' ///
-	4 `""Age 26-33""after-tax" "earnings""' ///
-	5 `""Age 34+""after-tax" "earnings""' ///
-	6 `""Baseline" "WTP""' ///
-	0.8 `""WTP via""private tuition""payments""' ///
+	0.8 `""Private tuition""payments""' ///
+	2 `""Age 19-25""after-tax" "earnings""' ///
+	3 `""Age 26-33""after-tax" "earnings""' ///
+	4 `""Age 34+""after-tax" "earnings""' ///
+	5 `""Baseline" "WTP""' ///
 	, labsize(small) notick ) ///
-	xline(1.4, lcolor(gs8%50) lpattern(-)) ///
 	///note("Lower Bound WTP", ring(0) pos(10) size(small)) ///
 	 $title
 graph export "${output_wtp}/fiu_wtp_decomposition.${img}", replace
-
-
-
 
 *Miller Wherry costs:
 clear
@@ -192,7 +185,7 @@ gen xaxis = _n
 	replace cost = -${mw_hosp_cost}  in 4 // hospitalisation costs
 	replace cost = ${mw_college_cost}  in 5 // college costs
 	replace cost = -${mw_tax_save} in 6 // tax rev
-	
+
 count if cost != .
 local items = r(N)
 
@@ -203,7 +196,7 @@ gen start_cost = 0
 
 forval i = 2/`items' {
 	replace start_cost = L.start_cost + L.cost in `i'
-	
+
 }
 
 gen finish_cost = start_cost + cost
@@ -228,7 +221,7 @@ su xaxis
 g need_ci = xaxis==r(max)
 g l_cost = `mw_l_cost'
 g u_cost = `mw_u_cost'
-su finish_cost 
+su finish_cost
 di `mw_cost'
 assert abs(`mw_cost'-r(min))<1
 
@@ -247,7 +240,7 @@ tw 	(bar cost xaxis in 1, barw(0.6) lcolor(%0) color("${secondcolour}")) /// pro
 		mlabpos(6)) ///
 	(scatter finish_cost xshift in `items', mlab(finish_label)  mlabs(small) msym(none) mlabc("$tc") ///
 		mlabpos(6)) ///
-	///(rcap l_cost u_cost xshift if need_ci, lcolor(gs7) ) /// 
+	///(rcap l_cost u_cost xshift if need_ci, lcolor(gs7) ) ///
 	(function y =0, lcolor(gs8%60) lwidth(thin) range(0.5 7.5)) ///
 	,  ///
 	ylabel(-7500 "-7.5K" -5000 "-5K"  -2500 "-2.5K" 0 2500 "2.5K" 5000 "5K", nogrid  ) ///
@@ -261,7 +254,7 @@ tw 	(bar cost xaxis in 1, barw(0.6) lcolor(%0) color("${secondcolour}")) /// pro
 	5 `""Govt." "college""costs""' ///
 	6 `""Taxes" "from future" "earnings""' ///
 	`=`items'+1' `""Net Cost To""Government""', labsize(small) notick) ///
-	legend(off) 
+	legend(off)
 
 graph export "${output}/MW_cost_decomposition.${img}", replace
 
@@ -283,11 +276,12 @@ gen xaxis = _n
 	replace wtp = wtp / 1000
 g t = _n
 tsset t
-g tot_wtp = wtp 
-su t 
+g tot_wtp = wtp
+su t
 forval i = 2/`=r(max)' {
 	replace tot_wtp = wtp + L.tot_wtp in `i'
 }
+
 replace tot_wtp = wtp if t == 1
 g white_out = tot_wtp - wtp
 
@@ -325,16 +319,13 @@ tw 	(bar tot_wtp xaxis if wtp > 0, barwidth(0.6) color("$basecolour") lcolor(%0)
 	(bar tot_wtp xaxis if wtp < 0, barwidth(0.6) color(white))  ///
 	(bar tot_wtp xaxis if final, barwidth(0.6) color("$finalcolour") lcolor(%0)) ///
 	(bar wtp xaxis if final, barwidth(0.6) color("$finalcolour") lcolor(%0)) ///
-	(bar wtp second_axis, color("$finalcolour") lcolor(%0) barwidth(0.6)) ///
 	(scatter tot_wtp xaxis if wtp >=0, mlab(label) msym(none) mlabc("$tc") mlabs(small) mlabpos(12)) ///
-	(scatter tot_wtp second_axis if wtp >=0, mlab(label) msym(none) mlabc("$tc") mlabs(small) mlabpos(12)) ///
 	(scatter tot_wtp xaxis if wtp <0, mlab(label) msym(none) mlabc("$tc")  mlabs(small) mlabpos(6)) ///
 	///(rcap l_wtp u_wtp xaxis , lcolor(gs7)) ///
-	(function y =0, lcolor(gs8%60) lwidth(thin) range(-0.7 6.5)) ///
+	(function y =0, lcolor(gs8%60) lwidth(thin) range(0.5 6.5)) ///
 	, ///
 	legend(off) xtitle("") ylabel(,nogrid notick ) ytitle("WTP ($)") ///
 	xlabel( ///
-	-0.2  `" "Private" "Insurance""Crowd Out""WTP""' ///
 	1 `" "Private" "Insurance""Crowd Out""' ///
 	2 "VSL WTP" ///
 	3 `""Private" "College" "Costs""' ///
@@ -342,9 +333,8 @@ tw 	(bar tot_wtp xaxis if wtp > 0, barwidth(0.6) color("$basecolour") lcolor(%0)
 	5 `""Age 37+""after-tax" "earnings" "' ///
 	6 `""Baseline" "WTP"' ///
 	, labsize(small) notick ) ///
-	ytitle(`"WTP"', )  ///
+	ytitle(`"WTP ($)"', )  ///
 	ylabel(0 15 "15K" 30 "30K" 45 "45K", valuelabel) ///
-	xline(0.4, lcolor(gs8%50) lpattern(-)) ///
 	$title
 graph export "${output_wtp}/MW_wtp_decomposition.${img}", replace
 
@@ -352,13 +342,13 @@ graph export "${output_wtp}/MW_wtp_decomposition.${img}", replace
 
 *CalGrant Cost Decomposition:
 run_program Cal_Grant_GPA
-clear 
+clear
 set obs 10
 g xaxis = _n
 
 *DATA INPUT:
-	gen cost = ${cal_gpa_grant} in 1 // initial Cal Grant Cost 
-	replace cost = ${cal_gpa_ed_exp} in 2 // additional Ed Cost 
+	gen cost = ${cal_gpa_grant} in 1 // initial Cal Grant Cost
+	replace cost = ${cal_gpa_ed_exp} in 2 // additional Ed Cost
 	replace cost =  -${cal_gpa_14y_tax} in 3 // Tax Revenue through Year 14
 	replace cost = -${cal_gpa_life_tax} in 4 // tax revenue through lifecycle
 count if cost != .
@@ -403,7 +393,7 @@ tw 	(bar cost xaxis if xaxis==1, barw(0.6) lcolor(%0) color("`red'")) /// initia
 	(scatter finish_cost xaxis if  xaxis==4, mlab(label) msym(none) mlabc("$tc") ///
 		mlabpos(12) mlabs(small)) ///
 	(scatter finish_cost xaxis if inrange(xaxis,2,3)|inrange(xaxis,5,6), mlab(label) msym(none) mlabc("$tc") ///
-		mlabpos(6) mlabs(small)) ///	
+		mlabpos(6) mlabs(small)) ///
 	(scatter finish_cost xshift in `items', mlab(finish_label) msym(none) mlabc("$tc") ///
 		mlabpos(6) mlabs(small)) ///
 	(function y =0, lcolor(gs8%60) lwidth(thin) range(0.5 `=`items'+1.5')) ///
@@ -443,7 +433,7 @@ gen xaxis = _n
 	replace wtp = . in 7 // "lower bound"
 	replace wtp = wtp / 1000
 	g wtp2 = wtp
-	
+
 forval i = 3(1)5 {
 	replace wtp2 = wtp2 + wtp2[`i'-1] in `i'
 }
@@ -466,7 +456,7 @@ drop if wtp == .
 su xaxis
 gen need_ci = xaxis==r(max)
 g l_wtp = `fiu_l_wtp'/1000
-g u_wtp = `fiu_u_wtp'/1000 
+g u_wtp = `fiu_u_wtp'/1000
 su wtp2
 assert abs(`fiu_wtp'/1000 - r(max))<0.001
 
@@ -485,7 +475,7 @@ tw 	(scatter wtp xaxis if xaxis<1, mlab(label) mlabs(small) msym(none) mlabc("$t
 	(scatter wtp2 xaxis if inrange(xaxis,4,5), mlab(label) mlabs(small) msym(none) mlabc("$tc") mlabpos(12)) ///
 	(scatter wtp2 xaxis if inrange(xaxis,2,3), mlab(label) mlabs(small) msym(none) mlabc("$tc") mlabpos(6)) ///
 	(scatter wtp xaxis if xaxis==6, mlab(label) mlabs(small) msym(none) mlabc("$tc") mlabpos(12)) ///
-	///(rcap l_wtp u_wtp xaxis if need_ci, lcolor(gs7) ) /// 
+	///(rcap l_wtp u_wtp xaxis if need_ci, lcolor(gs7) ) ///
 	(function y =0, lcolor(gs8%60) lwidth(thin) range(0.3 `=6.5')) ///
 	, ///
 	ylabel(-25 "-25K" 0 50 "50K" 100 "100K" , valuelabel) ///
@@ -529,15 +519,15 @@ gen xaxis = _n
 	replace cost = cost[1] + cost[2] in 3
 	replace cost = 974 - 142.3 in 4 //moral hazard including ge
 	replace cost = cost[1] + cost[2] + cost[4] in 5
-	g white_out = 0 
-	g cost_end = cost 
+	g white_out = 0
+	g cost_end = cost
 	replace white_out = cost[1] in 2
 	replace white_out = cost[1] + cost[2] in 4
 	replace  cost_end = white_out + cost
 	count if cost != .
 	local items = r(N)
 	gen label ="$" +  string(cost, "%4.0f")
-	
+
 tw 	(bar cost_end xaxis in 1, barw(0.6) lcolor(%0) color("`basecolour'")) ///
 	(bar cost_end xaxis in 2/`=`items'-1', barw(0.6) lcolor(white%0) color("`secondcolour'")) ///
 	(bar white_out xaxis in 2/`items', barw(0.62) lwidth(thick) lcolor(white) color(white)) ///
@@ -555,7 +545,7 @@ tw 	(bar cost_end xaxis in 1, barw(0.6) lcolor(%0) color("`basecolour'")) ///
 	1 "Program Costs" ///
 	2 `""Moral Hazard" "Costs""' 3`""Net Cost to" "Government excl." "GE Costs""'  4 `""Moral Hazard" "GE Costs""' ///
 	`items' `""Net Cost to""Government""', labsize(small) notick) ///
-	legend(off) 
+	legend(off)
 
 graph export "${output}/MC_intro_cost_decomposition.${img}", replace
 
@@ -565,7 +555,7 @@ set obs 10
 gen xaxis = _n
 
 
-*DATA INPUT: 
+*DATA INPUT:
 /*
 	local program_cost = 623.8
 	gen wtp = 1245.373 in 1 //total wtp
@@ -578,13 +568,13 @@ gen xaxis = _n
 	g wtp =.
 	replace wtp = 117.3  in 1 // oop spending
 	replace wtp = 507.1  in 2 // private insurance
-	replace wtp = 35.9730134949384 in 3 // health effects	
-	replace wtp = wtp[1] + wtp[2] + wtp[3] in 4	
+	replace wtp = 35.9730134949384 in 3 // health effects
+	replace wtp = wtp[1] + wtp[2] + wtp[3] in 4
 	replace wtp = 585 in 5 // insurance value
-	replace wtp = wtp[1]+ wtp[2] + wtp[3] +wtp[5] in 6 
+	replace wtp = wtp[1]+ wtp[2] + wtp[3] +wtp[5] in 6
 	//replace wtp = wtp/`program_cost'
 g wtp2 = wtp
-g white_out = 0 
+g white_out = 0
 forval i = 2/3 {
 	replace wtp2 = wtp2 + wtp2[`i'-1] in `i'
 	replace white_out = wtp2[`i' - 1] in `i'
@@ -609,4 +599,3 @@ tw 	(bar wtp2 xaxis, barwidth(0.6) color("`finalcolour'")) ///
 
 graph export "${output_wtp}/MC_intro_wtp_decomposition2.${img}", replace
 */
-

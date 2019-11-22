@@ -2,7 +2,7 @@
 /* 0. Program: SNAP to elderly: Info and Assistance*/
 ***************************************************
 
-*Finkelstein, Amy and Notowidigdo, Matthew J. 2018. "Take-up and Targeting: Experimental 
+*Finkelstein, Amy and Notowidigdo, Matthew J. 2018. "Take-up and Targeting: Experimental
 * Evidence from SNAP." NBER Working Paper No. 24652. http://www.nber.org/papers/w24652
 
 
@@ -16,7 +16,7 @@ for the approximately 80 percent of control group enrollees who do not receive t
 ********************************
 /* 1. Pull Global Assumptions */
 ********************************
- 
+
 local WTP_for_SNAP = ${WTP_for_SNAP} // WTP for $1 in SNAP benefits
 local wtp_valuation = "${wtp_valuation}"
 
@@ -111,7 +111,7 @@ local mispercep_high = .98 //Assumption explained Finkelstein and Notowidigdo (2
 
 local annual_admin_cost = 267 //Isaacs (2008), Finkelstein and Notowidigdo (2019) p. 27 (by application not recipient)
 
-*Amount of dollars in SNAP benefits recieved 
+*Amount of dollars in SNAP benefits recieved
 local month_benefit_low = 16 //Assumption explained Finkelstein and Notowidigdo (2018) p. 35
 local month_benefit_high = 178 //Assumption explained Finkelstein and Notowidigdo (2018) p. 35
 
@@ -177,7 +177,7 @@ local WTP = `benefit_effect_info_low' +  ///
 	`benefit_effect_info_high' + `benefit_effect_assist'
 
 if "`wtp_valuation'" == "lower bound" {
-	// no clear lower bound on valuation, choose valuation at 1% of program cost	
+	// no clear lower bound on valuation, choose valuation at 1% of program cost
 	local WTP = 0.01*`program_cost'
 }
 **************************

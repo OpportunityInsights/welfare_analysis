@@ -46,7 +46,7 @@ for mode = 1:4
             %Estimate baseline model, rather than running spec test
             spec_test=0;
             %Set cutoffs to use in step function: should be given in increasing order;
-            Psihat0=[0,5,1,1];    % [mean, sd of underlying dist., betap(1), betap(2)]
+            Psihat0=[0,10,1,1];    % [mean, sd of underlying dist., betap(1), betap(2)]
 
             if mode < 3
                 cutoffs=[ -1.64,1.64];

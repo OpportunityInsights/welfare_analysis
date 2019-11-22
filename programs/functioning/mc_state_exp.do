@@ -1,14 +1,14 @@
-*******************************************
+********************************
 /* 0. Program: Medicaid State Expansions */
-*******************************************
+********************************
 
-/* 
-Brown, David W., Amanda E. Kowalski, and Ithai Z. Lurie. 
+/*
+Brown, David W., Amanda E. Kowalski, and Ithai Z. Lurie.
 Long-Term Impacts of Childhood Medicaid Expansions on Outcomes in Adulthood
 No. w20835. National Bureau of Economic Research, 2018.
 
-Boudreaux, M. H., Golberstein, E., & McAlpine, D. D. (2016). 
-The long-term impacts of Medicaid exposure in early childhood: Evidence from the 
+Boudreaux, M. H., Golberstein, E., & McAlpine, D. D. (2016).
+The long-term impacts of Medicaid exposure in early childhood: Evidence from the
 program's origin.
 Journal of Health Economics, 45, 161-175.
 */
@@ -28,11 +28,54 @@ local vsl_assumption = "$vsl_assumption" // include vsl in MVPF, yes or no
 local vsl2012 = ${VSL_2012_USD} // In Millions
 
 local payroll_assumption = "$payroll_assumption" // "yes" or "no"
-local transfer_assumption = "$transfer_assumption" // "yes" or "no" 
+local transfer_assumption = "$transfer_assumption" // "yes" or "no"
 
 *********************************
 /* 2. Causal Inputs from Paper */
 *********************************
+/*
+local medi_spend_0_18 = 0.593	// Impact on total medicaid spending 0-18 undiscounted;
+								   0-18 BKL (2018) table 1
+local tax_rev_19_28 = 0.533		// Undiscounted sum 19-28 (cumulative effect to 28)
+								   from BKL 2018 table OA.7, column 10
+local wage_inc_19_28 = 1.177	// Undiscounted sum 19-28 (cumulative effect to 28)
+								   from BKL 2018 table OA.5, column 10
+local mort_19_28 = -0.02		// Cumulative effect 19-28 from BKL 2018 table OA.4, column 10
+local tax_rev_19 = 0.012		// BKL 2018 table OA.7
+local tax_rev_20 = 0.016		// BKL 2018 table OA.7
+local tax_rev_21 = 0.016		// BKL 2018 table OA.7
+local tax_rev_22 = 0.026		// BKL 2018 table OA.7
+local tax_rev_23 = 0.048		// BKL 2018 table OA.7
+local tax_rev_24 = 0.07			// BKL 2018 table OA.7
+local tax_rev_25 = 0.092		// BKL 2018 table OA.7
+local tax_rev_26 = 0.094		// BKL 2018 table OA.7
+local tax_rev_27 = 0.071		// BKL 2018 table OA.7
+local tax_rev_28 = 0.088		// BKL 2018 table OA.7
+local wage_inc_19 = 0.061		// BKL 2018 table OA.5
+local wage_inc_20 = 0.035		// BKL 2018 table OA.5
+local wage_inc_21 = -0.055		// BKL 2018 table OA.5
+local wage_inc_22 = 0.015		// BKL 2018 table OA.5
+local wage_inc_23 = 0.14		// BKL 2018 table OA.5
+local wage_inc_24 = 0.217		// BKL 2018 table OA.5
+local wage_inc_25 = 0.228		// BKL 2018 table OA.5
+local wage_inc_26 = 0.136		// BKL 2018 table OA.5
+local wage_inc_27 = 0.121		// BKL 2018 table OA.5
+local wage_inc_28 = 0.28		// BKL 2018 table OA.5
+local payroll_19 = 0.003		// BKL 2018 table OA.9
+local payroll_20 = 0			// BKL 2018 table OA.9
+local payroll_21 = -0.003		// BKL 2018 table OA.9
+local payroll_22 = 0			// BKL 2018 table OA.9
+local payroll_23 = 0.008		// BKL 2018 table OA.9
+local payroll_24 = 0.015		// BKL 2018 table OA.9
+local payroll_25 = 0.016		// BKL 2018 table OA.9
+local payroll_26 = 0.013		// BKL 2018 table OA.9
+local payroll_27 = -0.006		// BKL 2018 table OA.9
+local payroll_28 = -0.006		// BKL 2018 table OA.9
+local hosp_inc = 0.04			// Boudreaux et al. (2016) table 5 - Comes from 4% increase
+								   in hospital visits on medicaid introduction.
+local ever_coll_19_28 = 0.486	// BKL 2018 table OA.2
+*/
+
 
 /* Import estimates from paper, giving option for corrected estimates.
 When bootstrap!=yes import point estimates for causal estimates.
@@ -46,9 +89,9 @@ if "`bootstrap'" == "yes" {
 	if ${draw_number} ==1 {
 		preserve
 			use "${input_data}/causal_estimates/${folder_name}/draws/${name}.dta", clear
-			qui ds draw_number, not 
+			qui ds draw_number, not
 			global estimates_${name} = r(varlist)
-			
+
 			mkmat ${estimates_${name}}, matrix(draws_${name}) rownames(draw_number)
 		restore
 	}
@@ -80,7 +123,7 @@ local mean_earn_28 = 26.013*1000 // BKL (2018) table OA.5 column 10
 
 local hosp_base = 0.06 //Boudreaux et al. (2016) table 5
 
-*if "`tax_rate_assumption'" == "paper internal" local tax_rate = 20623/149245 
+*if "`tax_rate_assumption'" == "paper internal" local tax_rate = 20623/149245
 *BKL (2018), Table OA.5, Table OA.7; observed in paper, not used for calculations
 
 *Ages observed in sample (BKL page 2)
@@ -184,7 +227,7 @@ local priv_college_cost = (${bkl_tuition_cost})*2*(`ever_coll_19_28'/100)* ///
 * Forecast effects to later ages
 *************************************
 
-*Calculate the earnings and tax impact at age 28, the last year observed 
+*Calculate the earnings and tax impact at age 28, the last year observed
 local earn_impact_28 = `p_wage_inc_28'*`sum_wage_inc'
 local tax_impact_28 = `p_tax_rev_28'*`sum_tax_rev'
 
@@ -193,10 +236,10 @@ if "`proj_type'" == "growth forecast"{
 	est_life_impact `earn_impact_28', ///
 		impact_age(`old_age') project_age(`proj_start_age') end_project_age(`proj_age') ///
 		project_year(`=`earn_year'+1') usd_year(`USD_year') ///
-		income_info(`=`mean_earn_28'-0.5*`earn_impact_28'') income_info_type(counterfactual_income) /// 
+		income_info(`=`mean_earn_28'-0.5*`earn_impact_28'') income_info_type(counterfactual_income) ///
 		earn_method(multiplicative) tax_method(off) transfer_method(off) ///
 		max_age_obs(28)
-		
+
 	local cfactual_income = r(cfactual_income)
 	local earn_proj_d = ((1/(1+`discount_rate'))^`proj_start_age') * r(tot_earn_impact_d)
 }
@@ -209,18 +252,18 @@ if "`tax_rate_assumption'" ==  "cbo" {
 		include_payroll(`payroll_assumption') /// "yes" or "no"
 		forecast_income(yes) /// "yes" or "no"
 		usd_year(`USD_year') /// USD year of income
-		inc_year(`earn_year') /// year of income measurement 
+		inc_year(`earn_year') /// year of income measurement
 		program_age(`proj_start_age') ///
 		earnings_type(individual) // individual or household
-		
+
 	local tax_rate = r(tax_rate)
 }
 
 if "`tax_rate_assumption'" ==  "paper internal" {
 	if "`payroll_assumption'"=="no" {
 		local tax_rate = (`tax_rev_28'-`payroll_28')/`wage_inc_28'
-		di `tax_rate' 
-		
+		di `tax_rate'
+
 	}
 	if "`payroll_assumption'"=="yes" {
 		local tax_rate = `tax_rev_28'/`wage_inc_28'
@@ -267,7 +310,7 @@ if "`proj_type'" == "growth forecast" {
 di `increase_taxes_proj' +  `sum_tax_rev_d'
 di  `sum_wage_inc_d' - `sum_tax_rev_d'
 di  `wage_inc_19_28' - `tax_rev_19_28'
-di  `sum_wage_inc_d' 
+di  `sum_wage_inc_d'
 di  `sum_tax_rev_d'
 
 **********************************
@@ -328,9 +371,9 @@ local WTP = `after_tax_income_obs' + (1-`tax_rate')*`earn_proj_d' + ///
 *WTP from kid
 local WTP_kid = `after_tax_income_obs' + (1-`tax_rate')*`earn_proj_d' + ///
 			`bene_life_saved'  - `priv_college_cost'
-			
+
 if "$wtp_assumption"=="lower bound" {
-	local WTP = 0.01*`program_cost' // conservative lower bound as we don't observe 
+	local WTP = 0.01*`program_cost' // conservative lower bound as we don't observe
 	*any crowd out of private expenditure, which would be the ideal estimator here
 }
 

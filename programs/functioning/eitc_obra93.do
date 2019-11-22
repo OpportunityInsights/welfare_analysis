@@ -46,6 +46,7 @@ if "`tax_rate_assumption'" == "continuous" local tax_rate_cont = $tax_rate_cont
 local proj_age = $proj_age
 local years_bach_deg = $years_bach_deg
 local payroll_assumption = "$payroll_assumption"
+local years_enroll = $years_enroll
 
 local alt_transfer = "$alt_transfer"
 
@@ -522,50 +523,97 @@ if "`kid_impact'" == "MT" | "`kid_impact'" == "michelmore" {
 		end_project_age(`proj_age') usd_year(`usd_year') income_info_type(parent_income) ///
 		percentage(yes) parent_income_year(`parent_income_year') parent_age(`parent_age')
 
-		local one_kid_earn = r(tot_earn_impact_d)
-		local cfactual_income = r(cfactual_income)
+	local one_kid_earn = r(tot_earn_impact_d)
+	local cfactual_income = r(cfactual_income)
 
-		local inc_year = round(`project_year' + 34- `proj_start_age')
-		local kid_earn = (`number_kids'/18)*`one_kid_earn' * (1/(1+`discount_rate'))^(`project_year' - `parent_income_year' ) /* we divide number of kids by 18 because effects are for kids whose parents receive a credit when they are 18 - assume uniform distrib of kids over ages*/
+	local inc_year = round(`project_year' + 34- `proj_start_age')
+	local kid_earn = (`number_kids'/18)*`one_kid_earn' * (1/(1+`discount_rate'))^(`project_year' - `parent_income_year' ) /* we divide number of kids by 18 because effects are for kids whose parents receive a credit when they are 18 - assume uniform distrib of kids over ages*/
 
-		local program_age = 34
-		if "`tax_rate_assumption'" == "cbo" {
-			get_tax_rate `cfactual_income', ///
-				inc_year(`inc_year') ///
-				earnings_type(individual) ///
-				usd_year(`usd_year') ///
-				include_transfers(yes) forecast_income(yes) ///
-				include_payroll("`payroll_assumption'") program_age(`program_age')
-
-	local tax_rate_cont = r(tax_rate)
+	local program_age = 34
+	if "`tax_rate_assumption'" == "cbo" {
+		get_tax_rate `cfactual_income', ///
+			inc_year(`inc_year') ///
+			earnings_type(individual) ///
+			usd_year(`usd_year') ///
+			include_transfers(yes) forecast_income(yes) ///
+			include_payroll("`payroll_assumption'") ///
+			program_age(`program_age')
+		local tax_rate_cont = r(tax_rate)
 	}
 
-
-		local kid_tax = `kid_earn'*`tax_rate_cont'
-		local kid_earn_post = `kid_earn' -  `kid_tax' ///
-		- `priv_cost_impact'*`number_kids'* (1/(1+`discount_rate'))^(`project_year' - `parent_income_year' )
-
-		}
+	local kid_tax = `kid_earn'*`tax_rate_cont'
+	local kid_earn_post = `kid_earn' -  `kid_tax' ///
+	- `priv_cost_impact'*`number_kids'* (1/(1+`discount_rate'))^(`project_year' - `parent_income_year' )
+}
 
 **************************
 /* 5. Cost Calculations */
 **************************
-local program_cost = 1000*(1-`induced_prog_cost_frac')  
+local program_cost = 1000 * (1 - `induced_prog_cost_frac')
+local college_cost = 0
+* College costs calculation
+if "`kid_impact'" == "BM_college" {
+	foreach age in "0_5" "6_12" "13_18" {
+		local years_impact = `impact_BM_college_`age'' * ///
+							 `years_bach_deg'
+		if "`age'" == "0_5" {
+			local college_year = round(`program_year' + ///
+									   18 - (5 + 0) / 2)
+		}
+		else if "`age'" == "6_12" {
+			local college_year = `program_year' + 18 - (12 + 6) / 2
+		}
+		else if "`age'" == "13_18" {
+			local college_year = round(`program_year' + ///
+									   18 - (18 + 13) / 2)
+		}
+		deflate_to `program_year', from(`college_year')
+		local college_deflator = r(deflator)
 
-// Normalization of EITC benefits.
-// The total cost is a composition of the direct program costs, the fiscal extenalities due to changes in the labor supply, and the tax revenue from improvements in children's outcomes.
-local total_cost = `program_cost' + `FE_single'*(1 - `frac_married') ///
-	+ `frac_married'*`FE_married' - `kid_tax'
+		cost_of_college, year(`college_year')
+		local bm_cost_of_college = r(cost_of_college)
+		local college_cost_`age' = `bm_cost_of_college' * ///
+								   `years_impact' * `college_deflator'
+	}
+	local college_cost = `number_kids' * ( ///
+		`college_cost_0_5' * (5 - 0 + 1) / (18 - 0 + 1) + ///
+ 		`college_cost_6_12' * (12 - 6 + 1) / (18 - 0 + 1) + ///
+		`college_cost_13_18' * (18 - 13 + 1) / (18 - 0 + 1))
+}
+else if "`kid_impact'" == "MT" | "`kid_impact'" == "michelmore" {
+	local years_impact = `impact' * `years_enroll'
+	local college_year = round(`program_year' + 18 - (18 + 13) / 2)
+
+	deflate_to `program_year', from(`college_year')
+	local college_deflator = r(deflator)
+
+	cost_of_college, year(`college_year')
+	local MT_mich_cost_of_college = r(cost_of_college)
+	local college_cost = `MT_mich_cost_of_college' * `years_impact' * ///
+						 `college_deflator'
+}
+
+/* Normalization of EITC benefits.
+   The total cost is a composition of the direct program costs, the
+   fiscal extenalities due to changes in the labor supply, the tax
+   revenue from improvements in children's outcomes, and the increase
+   in college expenditures due to increases in enrolment and attainment
+   for children. */
+local total_cost = `program_cost' + `FE_single' * (1 - `frac_married') ///
+	+ `frac_married' * `FE_married' - `kid_tax' + `college_cost'
 
 di `program_cost'
 di `FE_single'
 di `FE_married'
 
-* get incomes in 2015 usd
+* Get incomes in 2015 USD
 deflate_to 2015, from(`usd_year')
 local deflator = r(deflator)
-local avg_eitc_earnings_2015 = `avg_eitc_earnings'*`deflator'
-if "`kid_impact'"!="none" local cfactual_income_2015 = `cfactual_income'*`deflator'
+
+local avg_eitc_earnings_2015 = `avg_eitc_earnings' * `deflator'
+if "`kid_impact'" != "none" {
+	local cfactual_income_2015 = `cfactual_income' * `deflator'
+}
 *************************
 /* 6. WTP Calculations */
 *************************

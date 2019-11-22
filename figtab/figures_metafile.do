@@ -146,7 +146,7 @@ qui include "${figtab_code}/scatter_cba_age.do"
 
 * Figure I - ACS forecast graphs
 *--------------------------------------------------
-qui include "${figtab_code}/acs_forecast_graphs.do"
+qui include "${figtab_code}/acs_forecasts_graphs.do"
 
 
 * Figure II - Normalised WTP

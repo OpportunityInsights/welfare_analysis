@@ -2,9 +2,9 @@
 /* 0. Program: Medicaid Intro */
 ***************************************
 
-/*Goodman-Bacon, Andrew. 
+/*Goodman-Bacon, Andrew.
 The long-run effects of childhood insurance coverage:
-Medicaid implementation, adult health, and labor market outcomes. 
+Medicaid implementation, adult health, and labor market outcomes.
 No. w22899. National Bureau of Economic Research, 2017.
 https://cdn.vanderbilt.edu/vu-my/wp-content/uploads/sites/2318/2019/04/14141045/medicaid_longrun_ajgb.pdf
 
@@ -48,9 +48,9 @@ if "`bootstrap'" == "yes" {
 	if ${draw_number} ==1 {
 		preserve
 			use "${input_data}/causal_estimates/${folder_name}/draws/${name}.dta", clear
-			qui ds draw_number, not 
+			qui ds draw_number, not
 			global estimates_${name} = r(varlist)
-			
+
 			mkmat ${estimates_${name}}, matrix(draws_${name}) rownames(draw_number)
 		restore
 	}
@@ -104,7 +104,7 @@ local usd_year = 2015 // Goodman-Bacon pg. 25
 *Approximate income of parents at 100% of FPL
 deflate_to 2015, from(1965)
 local parent_earn = 3223 *r(deflator) // FPL for 4 person HH in 1965
-*U.S. Bureau of the Census, Income, Poverty, and Health Insurance Coverage in 
+*U.S. Bureau of the Census, Income, Poverty, and Health Insurance Coverage in
 *the United States: 2008; 2010; 2012. Web: www.census.gov.
 di `parent_earn'
 
@@ -168,4 +168,3 @@ global inc_benef_`1' = `child_inc'
 global inc_type_benef_`1' = "individual"
 global inc_year_benef_`1' = `child_inc_year'
 global inc_age_benef_`1' = `child_inc_age'
-

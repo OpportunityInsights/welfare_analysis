@@ -3,6 +3,7 @@
 ********************************************************************************
 
 * Set file paths
+global welfare_git "${github}/Welfare"
 global welfare_dropbox "${welfare_files}"
 global assumptions "${welfare_dropbox}/MVPF_Calculations/program_assumptions"
 global program_folder "${welfare_git}/programs/functioning"

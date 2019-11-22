@@ -3,6 +3,8 @@
 ********************************************************************************
 set matsize 2000
 * Set file paths
+global welfare_git "${github}/Welfare"
+global welfare_dropbox "${welfare_files}"
 global assumptions "${welfare_files}/MVPF_Calculations/program_assumptions"
 global program_folder "${welfare_git}/programs/functioning"
 global ado_files "${welfare_git}/ado"
@@ -116,7 +118,7 @@ forval i = 1/`replications' {
 	}
 }
 
-*Draw uncorrected, save dataset 
+*Draw uncorrected, save dataset
 forval i = 1/`replications' {
 	clear
 	set obs 1

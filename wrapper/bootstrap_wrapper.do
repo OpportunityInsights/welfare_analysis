@@ -4,6 +4,8 @@
 set matsize 2000
 
 * Set file paths
+global welfare_git "${github}/Welfare"
+global welfare_dropbox "${welfare_files}"
 global assumptions "${welfare_files}/MVPF_Calculations/program_assumptions"
 global program_folder "${welfare_git}/programs/functioning"
 global ado_files "${welfare_git}/ado"
@@ -28,7 +30,7 @@ Note: modes can contain any of the following:
 - robustness: runs baseline and varies discount and tax rate
 - robustness_pe: runs baseline and varies discount and tax rate but doesn't bootstrap
 - normal: runs all specifications as in the program assumptions file
-- all: all except robustness_pe 
+- all: all except robustness_pe
 
 Corrected estimates modes:
 1 - skip estimating betap and assume kid estimates abs(t)>1.64 are 34.48x more
@@ -61,9 +63,12 @@ else if regexm("`modes'","robustness") {
 }
 
 *Import relevant programs
-local ado_files : dir "${welfare_git}/ado" files "*.ado"
-foreach file in `ado_files' {
-	if regexm("`file'","run_program")==0 do "${welfare_git}/ado/`file'"
+local ado_files 	est_life_impact int_outcome get_tax_rate deflate_to ///
+					cost_of_college get_mother_age convert_rank_dollar ///
+					scalartex
+
+foreach ado in `ado_files' {
+	do "${ado_files}/`ado'.ado"
 }
 *Reset data in memory assumption for est_life_impact
 global data_in_mem = "no"
@@ -104,9 +109,8 @@ local programs `all_functioning_programs'
 if "`1'"!="" {
 	if "`1'"=="all_programs" local programs `all_functioning_programs'
 	else local programs "`1'"
-}	
+}
 
-local programs = lower("`programs'")
 
 *Naming exceptions
 if strpos("`programs'", "cpc") & !strpos("`programs'", "cpc_") {
@@ -197,7 +201,7 @@ preserve
 		clear
 		set obs $replications
 		g draw = _n
-
+		set seed 802648379
 		foreach var in `college_effects' {
 			g `var' = runiform()
 		}
@@ -225,6 +229,7 @@ preserve
 		clear
 		set obs $replications
 		g draw = _n
+		set seed 634529276
 		g bw_earn_effect = runiform()
 		save "${welfare_files}/data/inputs/effect_draws/bw_effects_`replications'_draws.dta", replace
 	}
@@ -260,7 +265,7 @@ if regexm("`mode'","corrected") {
 else local use_estimates uncorrected
 
 foreach program in `programs' {
-	if regexm("`program'", "wtw_") & !inlist("`mode'", "baseline", "normal") continue
+	if regexm("`program'", "wtw_") & !inlist("`mode'", "baselines", "normal") continue
 
 capture {
 
@@ -318,7 +323,7 @@ if _rc == 0 {
 
 	ds
 	local varying_assumptions "`r(varlist)'"
-	
+
 	if inlist("`mode'","baselines","lower_bound_wtp","fixed_forecast","observed_forecast") | regexm("`mode'","corrected") {
 		cap confirm var spec_type // check for specification type indicator
 		if _rc==0 {
@@ -488,7 +493,7 @@ forval c = 1/`columns' {
 			}
 		}
 	}
-	
+
 	* Now get the point estimate and calculate the MVPF
 	* (need to know which quadrant the pe lies in to calculate the MVPF for the draws)
 	* Get point estimates
@@ -616,7 +621,7 @@ forval c = 1/`columns' {
 			}
 
 		}
-		
+
 			if `replications'>1 {
 			foreach est in `ests' {
 				qui su `est'_`program'
@@ -669,7 +674,7 @@ forval c = 1/`columns' {
 			*z_alpha = Phi^-1(alpha)
 			*z_0 = Phi^-1(F(x))
 			*x: point estimate
-			*F(): bootstrap distribution		
+			*F(): bootstrap distribution
 			local p_low_CBA = 2.5
 			local p_high_CBA = 97.5
 			foreach var in MVPF CBA {
@@ -682,7 +687,9 @@ forval c = 1/`columns' {
 					if `dist_sd_`program'' > 0 & `p_low_`var'' >0 {
 						sort `var'_`program'
 						cap drop pctile_`program'
-						gen pctile_`program' = _n/`replications'
+						count if !mi(`var'_`program')
+    					local n_`var'_`program' = `r(N)'
+    					gen pctile_`program' = _n/`n_`var'_`program'' if !mi(`var'_`program')
 						count if (`var'_`program' == ${`var'_`program'}) == 1
 						if `=r(N)' > 0 {
 							su pctile_`program' if (`var'_`program' == ${`var'_`program'})
@@ -760,7 +767,7 @@ forval c = 1/`columns' {
 			}
 		}
 	}
-	
+
 	*Save all estimates as a single row of data
 	clear
 	set obs 1

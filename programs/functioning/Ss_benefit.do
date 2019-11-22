@@ -175,7 +175,7 @@ if "`outcome_type'" == "enrollment" {
 }
 
 if "`proj_type'" == "growth forecast" {
-	*Initial Earnings Decline 
+	*Initial Earnings Decline
 	est_life_impact `pct_earn_impact_neg', ///
 		impact_age(`proj_start_age') project_age(`proj_start_age') end_project_age(`proj_short_end') ///
 		project_year(`project_year') usd_year(`usd_year') ///
@@ -184,7 +184,7 @@ if "`proj_type'" == "growth forecast" {
 		 percentage(yes)
 	local total_earn_impact_neg = r(tot_earn_impact_d)
 	local counterfactual_income_shortrun = r(cfactual_income) // For CBO tax rates.
-	
+
 	* Get marginal tax rate using counterfactual earnings, if we're using CBO tax rates.
 	if "`tax_rate_assumption'" ==  "cbo" {
 	  get_tax_rate `counterfactual_income_shortrun', ///
@@ -197,10 +197,10 @@ if "`proj_type'" == "growth forecast" {
 		 program_age(`impact_age') // age we're projecting from
 	  local tax_rate_shortrun = r(tax_rate)
 	}
-	
+
 	local increase_taxes_neg = `tax_rate_shortrun' * `total_earn_impact_neg'
 	local total_earn_impact_aftertax_neg = `total_earn_impact_neg' - `increase_taxes_neg'
-	
+
 	*Earnings Gain
 	est_life_impact `pct_earn_impact_pos', ///
 		impact_age(`proj_start_age_pos') project_age(`proj_start_age_pos') end_project_age(`proj_age') ///
@@ -210,7 +210,7 @@ if "`proj_type'" == "growth forecast" {
 		 percentage(yes)
 	local total_earn_impact_pos = ((1/(1+`discount_rate'))^7) * r(tot_earn_impact_d)
 	local counterfactual_income_longrun = r(cfactual_income) // For CBO tax rates.
-	
+
 	* Get marginal tax rate using counterfactual earnings, if we're using CBO tax rates.
 	if "`tax_rate_assumption'" ==  "cbo" {
 	  get_tax_rate `counterfactual_income_longrun', ///
@@ -223,7 +223,7 @@ if "`proj_type'" == "growth forecast" {
 		 program_age(`impact_age_pos') // age we're projecting from
 	  local tax_rate_longrun = r(tax_rate)
 	}
-	
+
 	local increase_taxes_pos = `tax_rate_longrun' * `total_earn_impact_pos'
 	local total_earn_impact_aftertax_pos = `total_earn_impact_pos' - `increase_taxes_pos'
 
@@ -263,7 +263,7 @@ if `partial_year' != 0 {
 
 *Note: Our cost of college calculator has a year range that starts at 1987
 *but the appropriate year here is 1981.
-cost_of_college, year(`project_year') type_of_uni("rmb") // we focus here on the cost of for four year enrollment. Average duration of induced enrollees is 3 years and two year schooling not discussed in paper. 
+cost_of_college, year(`project_year') type_of_uni("rmb") // we focus here on the cost of for four year enrollment. Average duration of induced enrollees is 3 years and two year schooling not discussed in paper.
 local cost_of_college = `r(cost_of_college)'
 
 if "`outcome_type'" == "years" {
@@ -385,4 +385,3 @@ global inc_benef_`1' = `counterfactual_income_longrun'*r(deflator)
 global inc_type_benef_`1' = "individual"
 global inc_year_benef_`1' = `impact_year_pos'
 global inc_age_benef_`1' = `impact_age_pos'
-

@@ -6,9 +6,7 @@ local programs jtpa_adult jtpa_youth work_advance yearup jobstart nsw_adult_wome
 
 * Set file paths
 global data_derived "${welfare_dropbox}/Data/derived"
-global output "${welfare_files}/figtab/Appendix"
-cap mkdir "${welfare_files}/figtab"
-cap mkdir "$output"
+global output "${welfare_files}/figtab/Appendix/"
 
 *Pull appendix table specs for each program:
 foreach prog in `programs' {

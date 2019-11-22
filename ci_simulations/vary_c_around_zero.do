@@ -2,16 +2,10 @@
 * Vary c around zero and see if we have "weak instruments" problem
 *-------------------------------------------------------------------------------
 
-cap ssc install parallel
-
 chdir "${welfare_git}/ci_simulations"
-global data_derived "${welfare_files}/Data/derived"
-global figtab "${welfare_files}/figtab"
-global output "${figtab}/ci_simulations"
-cap mkdir "$figtab"
+global output "${output_root}/ci_simulations"
 cap mkdir "$output"
-
-if "$img"=="" global img pdf
+cap ssc install parallel
 
 global bootstrap_reps = 1000
 local sim_reps = 3000

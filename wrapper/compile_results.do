@@ -3,6 +3,7 @@
 ********************************************************************************
 
 * Set file paths
+global welfare_git "${github}/Welfare"
 global welfare_dropbox "${welfare_files}"
 global assumptions "${welfare_dropbox}/MVPF_Calculations/program_assumptions"
 global program_folder "${welfare_git}/programs/functioning"
@@ -19,7 +20,7 @@ do "${ado_files}/int_outcome.ado"
 do "${ado_files}/get_tax_rate.ado"
 
 *Define groups and outcomes for dollar spend averages
-local groups prog_type kid_ind  ///
+local groups prog_type kid_ind income_level prog_by_inc ///
 	kid_by_decade k_by_pt ps_by_pt prog_by_age ///
 	peer_by_type rct_by_type hi_obs_prog kid_cat kid kid_obs_by_type
 
@@ -155,7 +156,7 @@ else if "`compile_type'"=="robustness" assert _merge==3 if regexm(program,"wtw")
 else assert _merge==3 if regexm(program,"wtw")==0
 
 *Only keep matches
-keep if _merge==3 
+keep if _merge==3
 drop _merge
 
 *Adjust incomes to be comparable
@@ -197,7 +198,8 @@ foreach type in benef stat {
 *Generate variable for broad category
 
 destring years_observed, force gen(temp)
-g obs_hi = temp>=5
+
+g obs_hi = (temp>=5 & temp !=.) // static programs now excluded from this
 tostring obs_hi, replace
 g hi_obs_prog = prog_type+obs_hi
 
@@ -228,7 +230,9 @@ foreach age in age_stat age_benef {
 tostring age_benef_bin, replace
 
 g prog_by_age = prog_type+ "_" +age_benef_bin
+g age_by_income = income_level + "_" + age_benef_bin
 destring age_benef_bin, replace
+g prog_by_inc = prog_type+"_"+income_level
 
 *Generate kid policy categories
 g kid = age_benef<=23
@@ -392,7 +396,7 @@ foreach outcome in `outcomes' {
 				drop if regexm("`use_programs'",program)==0 | `group_var' != "`type'"
 				assert has_ses
 				assert p_val_range==0
-			
+
 				*Normalise each policy by cost
 				replace wtp = wtp/program_cost
 				replace cost = cost/program_cost
@@ -540,10 +544,13 @@ foreach outcome in `outcomes' {
 
 				su avg_`outcome'
 				local dist_sd = r(sd)
-				if `dist_sd' > 0.0000001 & `p_low'>0 & `dist_sd' !=0{ // only do this when we have distributions - have run into issues where the sd for some reason isn't exactly 0 but there is clearly no variation so compare to very small number instead of 0 
+				if `dist_sd' > 0.0000001 & `p_low'>0 & `dist_sd' !=0{ // only do this when we have distributions - have run into issues where the sd for some reason isn't exactly 0 but there is clearly no variation so compare to very small number instead of 0
 					sort avg_`outcome'
 					*get pctile of point estimate in bootstrap distribution
-					gen pctile = _n/`replications'
+					count if !mi(avg_`outcome')
+					local n_avg_`outcome' = `r(N)'
+					gen pctile = _n/`n_avg_`outcome'' if !mi(avg_`outcome')
+
 					count if (`point_est' == avg_`outcome')
 					if `=r(N)' > 0 {
 						su pctile if (`point_est' == avg_`outcome')
@@ -552,9 +559,9 @@ foreach outcome in `outcomes' {
 						if inrange(0.5,`=r(min)',`=r(max)') local point_est_pctile = 0.5
 					}
 					else {
-						su pctile if (`point_est' <= avg_`outcome')
+						su pctile if (`point_est' < avg_`outcome')
 						local upper_p = r(min)
-						su pctile if (`point_est' >= avg_`outcome')
+						su pctile if (`point_est' > avg_`outcome')
 						local lower_p = r(max)
 						local point_est_pctile = (`lower_p' + `upper_p')/2
 					}
@@ -616,6 +623,11 @@ foreach outcome in `outcomes' {
 				append using `temp_est`j''
 			}
 
+			cap assert inrange(avg_`group_var'_`outcome',l_avg_`group_var'_`outcome',u_avg_`group_var'_`outcome') if !mi(avg_`group_var'_`outcome')&!mi(l_avg_`group_var'_`outcome')
+			if _rc>0 noi di as err "NOT IN RANGE!"
+			cap assert inrange(avg_`group_var'_`outcome',l_avg_`group_var'_`outcome'_ef,u_avg_`group_var'_`outcome'_ef) if !mi(avg_`group_var'_`outcome')&!mi(l_avg_`group_var'_`outcome'_ef)
+			if _rc>0 noi di as err "NOT IN RANGE!"
+
 			tempfile `group_var'_`outcome'
 			save ``group_var'_`outcome'', replace
 		}
@@ -653,7 +665,7 @@ bys prog_type : egen avg_prog_type_year_imp = mean(year_implementation) if !mi(a
 if "`compile_type'"!="robustness" {
 	save "${data_derived}/all_programs_`sample's_corr_`corr'_unbounded_averages.dta", replace
 	ren infinity infinity_mvpf
-	ds avg*mvpf mvpf 
+	ds avg*mvpf mvpf
 	local varlist `r(varlist)'
 	foreach var in `varlist' {
 		local var_group = subinstr("`var'", "avg_","",.)
@@ -667,7 +679,7 @@ if "`compile_type'"!="robustness" {
 
 	drop infinity*
 	save "${data_derived}/all_programs_`sample's_corr_`corr'.dta", replace
-} 
+}
 else {
 	g robust_spec = "`rspec_type_`loop'': `rspec_val_`loop''"
 	tempfile rob_`loop'_`sample'
@@ -684,7 +696,7 @@ if "`compile_type'"=="robustness" {
 		}
 		save "${data_derived}/all_programs_`sample's_`compile_type's_corr_`corr'_unbounded_averages.dta", replace
 		ren infinity infinity_mvpf
-		ds avg*mvpf mvpf 
+		ds avg*mvpf mvpf
 		local varlist `r(varlist)'
 		foreach var in `varlist' {
 			local var_group = subinstr("`var'", "avg_","",.)

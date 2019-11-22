@@ -1,22 +1,26 @@
 * Load assumptions and run a welfare program
+* Warning: This ado-file will not properly run programs ending in "_*"
+*	   because the assumptions files are not loaded correctly.
 
 cap program drop run_program
 
 program define run_program, rclass
 
-syntax anything(name=program id="Program") 
+syntax anything(name=program id="Program")
 
 * Set file paths
+global welfare_git "${welfare_git}/Welfare"
+global welfare_dropbox "${welfare_files}"
 global assumptions "${welfare_files}/MVPF_Calculations/program_assumptions"
 global program_folder "${welfare_git}/programs/functioning"
 global ado_files "${welfare_git}/ado"
 global data_derived "${welfare_files}/Data/derived"
 global input_data "${welfare_files}/data/inputs"
 global correlation=1
+local ado_files : dir "${welfare_git}/welfare/ado" files "*.ado"
 
-local ado_files : dir "${welfare_git}/ado" files "*.ado"
 foreach file in `ado_files' {
-	if regexm("`file'","run_program")==0 do "${welfare_git}/ado/`file'"
+	if regexm("`file'","run_program")==0 do "${welfare_git}/welfare/ado/`file'"
 }
 local program = lower("`program'")
 
@@ -77,6 +81,6 @@ if (strpos("`program'", "cpc")) & regexm("`program'","ui")==0 {
 }
 global draw_number = 0
 
-do "${welfare_git}/programs/functioning/`do_file'.do" `program' no uncorrected
+do "${welfare_git}/welfare/programs/functioning/`do_file'.do" `program' no uncorrected
 
 end

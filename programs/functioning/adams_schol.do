@@ -285,6 +285,13 @@ if "${got_adams_costs}"!="yes" {
 	di `fte_adams_mast'
 	di `adams_bach_cost_of_college'
 	
+	/* This cost_of_college call includes the entire UMass system from the Delta Cost project.
+	   One of the "child" institutions is the central office (166665 IPEDS unitid). We include
+	   this as the education-related expenditures of the central office are related to the 
+	   enrolment in the rest of the system. For reference, the education-related expenditures
+	   of the central office make up around 5% of the total education-related expenditures of
+	   the system 
+	*/
 	cost_of_college, state(MA) year(`year_reform') name("university of massachusetts-boston")
 	global adams_umass_cost_of_college = r(cost_of_college)*`deflator'
 	global adams_umass_tuition = r(tuition)*`deflator'
