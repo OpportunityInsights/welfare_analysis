@@ -1,8 +1,8 @@
 *****************************************
-/* 0. Program: SNAP FinkNoto: Just Info*/
+/* 0. Program: SNAP to elderly: Just Info*/
 *****************************************
 
-*Finkelstein, Amy and Notowidigdo, Matthew J. 2018. "Take-up and Targeting: Experimental 
+*Finkelstein, Amy and Notowidigdo, Matthew J. 2018. "Take-up and Targeting: Experimental
 * Evidence from SNAP." NBER Working Paper No. 24652. http://www.nber.org/papers/w24652
 
 * Provide information to individuals likely eligible for SNAP
@@ -26,7 +26,7 @@ local wtp_valuation = "${wtp_valuation}"
 ******************************
 /*
 
-*Effect on SNAP Take-Up for the information only treatment group 
+*Effect on SNAP Take-Up for the information only treatment group
 
 /*Difference between treatment and control percent applying to SNAP where xx% --> .xx*/
 local effect_take_up = 0.147-0.077 // Finkelstein and Notowidigo 2018, Table 2, row 2
@@ -50,9 +50,9 @@ if "`bootstrap'" == "yes" {
 
 	preserve
 		use "${input_data}/causal_estimates/${folder_name}/draws/${name}.dta", clear
-		qui ds draw_number, not 
+		qui ds draw_number, not
 		global estimates_${name} = r(varlist)
-		
+
 		mkmat ${estimates_${name}}, matrix(draws_${name}) rownames(draw_number)
 		restore
 	}
@@ -80,32 +80,32 @@ preserve
 * age
 local age_stat = 68.83 // Finkelstein and Notowidigdo (2019) table 1
 
- 
+
 local months_benefit = 36 //Finkelstein and Notowidigdo (2019) pg. 11
 /*From pg. 11:  Once deemed eligible, an elderly household is certified to receive
-SNAP benefits for 36 months, although there are exceptions that require earlier 
+SNAP benefits for 36 months, although there are exceptions that require earlier
 re-certification */
 
 local prob_benefit = .75 //Finkelstein and Notowidigdo (2018) p. 35 (assumed)
-/*From pg. 35: "To calculate expected benefits from applying, we assume that the 
+/*From pg. 35: "To calculate expected benefits from applying, we assume that the
 probability of rejection is 0.25 for both types (the rejection rate for the controls)." */
 
 
-/*Note that all recipients who do not recieve the minimum benefit ($16) (low-benefit type) are 
+/*Note that all recipients who do not recieve the minimum benefit ($16) (low-benefit type) are
 considered the high-benefit type (who recieve an average benefit of $178). Appendix Table 6
-provides the percent of marginal recipients and inframarginal recipients who are the low-benefit, 
-and as such we can infer the corresponding percentages for the high-benefit type given 
-the binary categories defined in the model. */ 
+provides the percent of marginal recipients and inframarginal recipients who are the low-benefit,
+and as such we can infer the corresponding percentages for the high-benefit type given
+the binary categories defined in the model. */
 local marginal_low = .453 // Finkelstein and Notowidigdo (2019), Table A7, pg. A22
 local marginal_high = .547 // Finkelstein and Notowidigdo (2019), Table A7, pg. A22
 
 
-*Calibrated parameter: misperception of probability of approval 
+*Calibrated parameter: misperception of probability of approval
 local mispercep_low = .83 //Assumption explained Finkelstein and Notowidigdo (2019) p. 28
 local mispercep_high = .98 //Assumption explained Finkelstein and Notowidigdo (2019) p. 28
 
 
-*Costs to government 
+*Costs to government
 local annual_admin_cost = 267 //Isaacs (2008), Finkelstein and Notowidigdo (2019) p. 27 (by application not recipient)
 
 /*Amount of dollars in SNAP benefits recieved*/
@@ -115,8 +115,8 @@ local month_benefit_high = 178 //Assumption explained Finkelstein and Notowidigd
 local hh_inc = 1500/0.15
 local usd_year = 2017
 /*
-"average annual SNAP benefits are about $1,500, or about 15 percent of household 
-income among the eligible (Center on Budget and Policy Priorities, 2017)." 
+"average annual SNAP benefits are about $1,500, or about 15 percent of household
+income among the eligible (Center on Budget and Policy Priorities, 2017)."
 Finkelstein & Notowidigdo (2018)
 */
 
@@ -142,13 +142,13 @@ local expected_benefit_low_adj = `prob_benefit'*`WTP_for_SNAP'*`tot_cost_prov_lo
 local expected_benefit_high_adj = `prob_benefit'*`WTP_for_SNAP'*`tot_cost_prov_high'
 
 
-*Effect of Experiment on Expected Benefits, Inclusive of Misperceptions 
+*Effect of Experiment on Expected Benefits, Inclusive of Misperceptions
 /*Information Effect = Expected Benefit * Misperception * Effect on Marginal;
  Assistance Effect = Reduction in Cost * (Fraction Inframarginal + Effect on Marginal)*/
 local benefit_effect_info_low = `mispercep_low'*`expected_benefit_low_adj'*`effect_take_up_adj_low'
 local benefit_effect_info_high = `mispercep_high'*`expected_benefit_high_adj'*`effect_take_up_adj_high'
 
-*Effect of Experiment on Expected Total Costs, Inclusive of Misperceptions 
+*Effect of Experiment on Expected Total Costs, Inclusive of Misperceptions
 /*Cost Effect = (Expected Benefit + Government Cost) * Effect on Marginal*/
 local total_cost_low = (`expected_benefit_low'+`annual_admin_cost')*`effect_take_up_adj_low'
 local total_cost_high = (`expected_benefit_high'+`annual_admin_cost')*`effect_take_up_adj_high'
@@ -177,7 +177,7 @@ if "`wtp_valuation'" == "lower bound" {
 
 di `WTP'
 di `total_cost'
- 
+
 local MVPF = `WTP'/`total_cost'
 
 ****************
@@ -195,7 +195,7 @@ global WTP_`1' = `WTP'
 global MVPF_`1' = `MVPF'
 
 global age_stat_`1' = `age_stat'
-global age_benef_`1' = 	`age_stat' 
+global age_benef_`1' = 	`age_stat'
 
 * income globals
 deflate_to 2015, from(`usd_year')
@@ -208,4 +208,3 @@ global inc_benef_`1' = `hh_inc' * r(deflator)
 global inc_type_benef_`1' = "household"
 global inc_year_benef_`1' = `usd_year'
 global inc_age_benef_`1' =  `age_stat'
-

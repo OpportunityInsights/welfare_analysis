@@ -1,5 +1,5 @@
 ********************************************************************************
-*						PREPARE CAUSAL ESTIMATES							   *
+*						PREPARE CORRECTED ESTIMATES							   *
 ********************************************************************************
 set matsize 2000
 * Set file paths
@@ -44,7 +44,7 @@ foreach program in `programs' {
 	if _rc != 0 noi di "`program'"
 	g clusterid = `i'
 	g program = "`program'"
-	local name_`i' = "`program'" 
+	local name_`i' = "`program'"
 	tostring p_value, replace force
 	append using `all'
 	save `all', replace
@@ -63,12 +63,12 @@ preserve
 	replace program = substr(program,1, 4) if prog_type == "Unemp. Ins."
 	replace program = "mto" if strpos(program, "mto")==1
 	replace program = "cpc" if strpos(program, "cpc_")
-	
-	drop if (inlist(program, "mto")| prog_type == "Top Taxes") & main_spec == 0 
+
+	drop if (inlist(program, "mto")| prog_type == "Top Taxes") & main_spec == 0
 	keep program ETI main_spec prog_type earnings_type
-	
+
 	duplicates drop
-	
+
 	tempfile more_details
 	save `more_details'
 restore
@@ -83,7 +83,7 @@ replace p_value = "" if p_value_range !=""
 
 *Get SE from t-stat
 replace se = abs(pe / t_stat) if se==. & t_stat!=.
-	
+
 *Get SE from ci range
 replace se = abs(((ci_hi - ci_lo)/2)/invnormal(0.975)) if se==. & ci_lo!=. & ci_hi!=.
 
@@ -106,9 +106,9 @@ g t = pe/se
 * make unique identifier
 replace estimate = estimate +"_"+ strofreal(clusterid)
 cap drop baseline // old flag in csv files
-g baseline = 1 
+g baseline = 1
 * Only do this on baseline sample
-replace baseline = 0 if main_spec == 0 
+replace baseline = 0 if main_spec == 0
 replace baseline = 0 if in_baseline == 0 // use only estimates that enter the baseline spec (as well as baseline sample)
 
 g restricted = baseline
@@ -125,7 +125,7 @@ forval i = 0/1 {
 		local count_`i'_baseline = r(N)
 		count if restricted
 		local count_`i'_restricted = r(N)
-		export delimited "${causal_ests_uncorrected}/kid_`i'_names.csv", replace 
+		export delimited "${causal_ests_uncorrected}/kid_`i'_names.csv", replace
 		g id_num =_n
 		tempfile old`i'
 		save `old`i''
@@ -165,14 +165,14 @@ foreach sample in baseline  {
 		ren v2 t_temp
 		g id_num =_n
 		merge 1:1 id_num using `old`i'', nogen assert(match)
-		
+
 		corr t t_temp
 		assert r(rho)>0.999
 		drop t_temp
 
 		g temp_cluster = "_"+ strofreal(clusterid)
 		replace estimate = regexr(estimate, temp_cluster, "")
-		
+
 		append using `correct'
 		save `correct', replace
 	}
@@ -180,9 +180,9 @@ foreach sample in baseline  {
 	replace pe = mvpf_effect*pe
 	g pe_corrected = mvpf_effect*corrected_t*se
 	* merge with old estimates
-	merge 1:1 estimate clusterid using `original_estimates' 
+	merge 1:1 estimate clusterid using `original_estimates'
 	assert  (mi(se)|selection == 0 | primary_estimate == 0) if _merge == 2
-	 
+
 	assert _merge == 2 if mi(pe_corrected)
 	drop _merge
 	replace pe_corrected = pe if mi(pe_corrected)
@@ -200,4 +200,3 @@ foreach sample in baseline  {
 	}
 }
 }
-
