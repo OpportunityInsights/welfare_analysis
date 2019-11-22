@@ -2,23 +2,27 @@
 * Make a heatmap of the coverage of our bootstrap CIs
 *-------------------------------------------------------------------------------
 
+local odyssey no
 cap ssc install parallel
 
-chdir "${welfare_git}/ci_simulations"
-global data_derived "${welfare_files}/Data/derived"
-global figtab "${welfare_files}/figtab"
-global output "${figtab}/ci_simulations"
-cap mkdir "$figtab"
+if "`odyssey'"=="no" {
+	chdir "${github}/Welfare/ci_simulations"
+	global output "${output_root}/ci_simulations"
+	global data_derived "${welfare_files}/Data/derived"
+}
+if "`odyssey'"=="yes" {
+	global output "`c(pwd)'"
+	global data_derived "`c(pwd)'"
+	cap ssc install parallel
+}
 cap mkdir "$output"
-
-if "$img"=="" global img pdf
-
 global bootstrap_reps = 1000
 local sim_reps = 3000
 global inf = 99999
 
 *Parallel options
 parallel setclusters 4
+if "`odyssey'"=="yes" parallel setclusters 64, force
 
 cap parallel clean, all
 
@@ -26,7 +30,7 @@ cap parallel clean, all
 global grid_step = 	0.25
 local wtp_min = 	0
 local wtp_max = 	4
-local cost_min =   -1
+local cost_min = 	-1
 local cost_max = 	3
 
 confirm number ${welfare_seed}

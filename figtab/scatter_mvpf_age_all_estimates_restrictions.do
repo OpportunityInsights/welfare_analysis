@@ -46,9 +46,18 @@ foreach restriction in kid_in_baseline years_observed peer_reviewed identificati
 	if "`restriction'" == "years_observed" {
 		drop if substr(hi_obs_prog,strlen(hi_obs_prog),1) == "0"
 		local groupname hi_obs_prog
+		* for this one graph ONLY, have dollar spend averages for single policies
+		bys hi_obs_prog: g count_group = _N
+
+		replace avg_hi_obs_prog_mvpf = mvpf if count_group == 1 & has_ses ==1 & p_val_rang == 0 
+		replace l_avg_hi_obs_prog_mvpf_ef = l_mvpf_ef if count_group == 1 & has_ses ==1 & p_val_rang == 0 
+		replace u_avg_hi_obs_prog_mvpf_ef = u_mvpf_ef if count_group == 1 & has_ses ==1 & p_val_rang == 0 
+		replace avg_hi_obs_prog_age_benef = age_benef if count_group == 1 & has_ses ==1 & p_val_rang == 0 
+		
 		global pos_Cash_Transfers = "mlabpos(10)"
 		global pos_Job_Training = "mlabpos(9)"
 		global pos_Nutrition = "mlabpos(4)"
+
 
 
 	}
@@ -92,7 +101,10 @@ foreach restriction in kid_in_baseline years_observed peer_reviewed identificati
 	gen stagger_age = age + stagger
 
 	bys prog_type : gen plot_avg = _n==1
+	if "`restriction'" == "years_observed" {
+		replace plot_avg = 1 if count_group == 1 & has_ses ==1 & p_val_rang == 0 
 
+		}
 	*-------------------------------------------------------------------------------
 	*	Point estimates - no prior taxes/eitc, dollar spend avgs, no CIs
 	*-------------------------------------------------------------------------------
@@ -273,7 +285,6 @@ preserve
 	tw `graph_commands' ///
 		, legend(off) ///
 		$options
-
 	graph export "${output}/scatter_mvpf_by_age_all_dollar_avgs_w_cis_`restriction'.${img}", replace
 
 		tw  `graph_commands2' `graph_commands' ///

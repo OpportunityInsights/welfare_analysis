@@ -2,7 +2,6 @@
 * Graph value of information estimates
 *********************************************************************************
 global output "${output_root}/scatter/infovalue"
-cap mkdir"$output"
 
 use "${data_derived}/infovalue/value_of_information_estimates.dta", clear
 

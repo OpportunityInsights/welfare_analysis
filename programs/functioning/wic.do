@@ -26,7 +26,7 @@ local proj_age = $proj_age
 local payroll_assumption = "$payroll_assumption" // "yes" or "no"
 local transfer_assumption = "$transfer_assumption" // "yes" or "no" 
 local ev_adjustment = "$ev_adjustment" //"yes" or "no"
-local spec_type =  "$spec_type" 
+local wtp_valuation =  "$wtp_valuation" 
 	
 *****************************
 /* 2. Estimates from Paper */
@@ -214,7 +214,7 @@ local WTP_kid = 0
 if "`ev_adjustment'" == "yes" local ev_adj = `ev'
 else local ev_adj = 1
 
-if "`spec_type'"=="lower bound wtp" local WTP = `ev_adj'*`program_cost' 
+if "`wtp_valuation'"=="lower bound wtp" local WTP = `ev_adj'*`program_cost' 
 
 else {
 	if "`pop_interest'"=="combined" {

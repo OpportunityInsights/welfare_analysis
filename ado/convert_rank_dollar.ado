@@ -1,26 +1,26 @@
 /*******************************************************************************
 * Convert Ranks to Dollars
 ********************************************************************************
-	DESCRIPTION: This program converts ranks into dollar values using the
+	DESCRIPTION: This program converts ranks into dollar values using the 
 	crosswalk from the inside
 	You can either just convert a single rank to a dollar amount
-
+	
 		(syntax: convert_rank_dollar XX, vartype [multiply100]
 				 where XX = rank value for which you want to know the dollar amount)
-
-	Or you can compute the difference in ranks from a given base to dollars
-	(e.g. how much is 1 SD in ranks for kir_black_male_p25)
-
+	
+	Or you can compute the difference in ranks from a given base to dollars 
+	(e.g. how much is 1 SD in ranks for kir_black_male_p25) 
+	
 		(syntax: convert_rank_dollar XX YY, vartype
 				 where XX = rank value for the base (e.g. mean)
-				 and   YY = change (e.g. SD))
-
+				 and   YY = change (e.g. SD)) 
+				 
 	Or convert an entire variable to dollar values
 	(syntax: convert_rank_dollar varname, vartype [multiply100] variable
-				 where varname = name of the variable you want to convert and
+				 where varname = name of the variable you want to convert and 
 				 you must specify variable to signal you want to convert an entire
 				 column)
-
+				 
 where 'vartype' refers to the type of variable you are converting, and can be either of
 the following: kir, kfr, wagerank, kfr_26_e, kfr_26_l, kir_26_e, kir_26_l, par_inc.
 Note:_e and _l refer to early (1978-1983) and late (1984-1989) birth cohorts.
@@ -30,12 +30,12 @@ Note:_e and _l refer to early (1978-1983) and late (1984-1989) birth cohorts.
 cap program drop convert_rank_dollar
 
 * define program
-program define convert_rank_dollar, rclass
+program define convert_rank_dollar, rclass 
 
 	* syntax
 	syntax anything[, kir kfr kfr_26_e kir_26_e kfr_26_l kir_26_l par_inc ///
-		wagerank sd multiply100 variable reverse]
-	tokenize `anything'
+		wagerank sd multiply100 variable reverse] 
+	tokenize `anything' 
 
 	* set household or individual income
        if "`kfr'" != ""			local inc kid_hh_income
@@ -58,15 +58,15 @@ program define convert_rank_dollar, rclass
 		exit
 		}
 	if "`3'" !="" {
-		di in red "only one or two inputs allowed"
+		di in red "only one or two inputs allowed" 
 		exit
 		}
 	if `1' > 101 & "`reverse'"=="" {
-		di in red "please specify option reverse if that's what you want to do"
+		di in red "please specify option reverse if that's what you want to do" 
 		exit
 		}
 	if "`reverse'"!="" & ("`sd'"!=""|"`variable'"!=""|"`multiply100'"!="") {
-		di in red "reverse option is not compatible with sd, variable or multiply100 options"
+		di in red "reverse option is not compatible with sd, variable or multiply100 options" 
 		exit
 		}
 	if "`sd'" !="" & "`variable'"!= "" {
@@ -79,19 +79,14 @@ program define convert_rank_dollar, rclass
 	* build temp data
 	*******
 
-	qui: count
-	local N = `r(N)'
-	if `N' < 101 {
-		local base_obs = _N
-		tempvar orig
-		g `orig' = 1
-		set obs 101
-	}
+	qui: count 
+	local N = `r(N)' 
+	if `N' < 101	 			set obs 101
 
 	tempvar temp_percentile
 	gen `temp_percentile' = _n-1 in 1/101
 
-	* kfr
+	* kfr 
 	if "`kfr'" != ""  {
 		tempvar temp_`inc'
 		gen `temp_`inc'' = .
@@ -198,7 +193,7 @@ program define convert_rank_dollar, rclass
 		replace `temp_`inc'' = 1062313.625 if _n ==101
 		}
 
-	* kir
+	* kir	
 	if "`kir'" != "" {
 		tempvar temp_`inc'
 		qui: gen `temp_`inc'' = .
@@ -305,7 +300,7 @@ program define convert_rank_dollar, rclass
 		replace `temp_`inc'' = 649917.375 if _n ==101
 		}
 
-	* wagerank
+	* wagerank	
 	if "`wagerank'" != "" {
 		tempvar temp_`inc'
 		qui: gen `temp_`inc'' = .
@@ -412,7 +407,7 @@ program define convert_rank_dollar, rclass
 		replace `temp_`inc'' = 249.2462158203125 if _n ==101
 		}
 
-	* kfr_26 early
+	* kfr_26 early	
 	if "`kfr_26_e'" != ""  {
 		tempvar temp_`inc'
 		gen `temp_`inc'' = .
@@ -519,9 +514,9 @@ program define convert_rank_dollar, rclass
 		replace `temp_`inc'' = 333266.0625 if _n ==101
 		}
 
-	* kir_26 early
+	* kir_26 early	
 	if "`kir_26_e'" != ""  {
-		tempvar temp_`inc'
+		tempvar temp_`inc'	
 		gen `temp_`inc'' = .
 		replace `temp_`inc'' = 0 if _n ==1
 		replace `temp_`inc'' = 0 if _n ==2
@@ -627,7 +622,7 @@ program define convert_rank_dollar, rclass
 		}
 
 
-	* kfr_26 late
+	* kfr_26 late	
 	if "`kfr_26_l'" != ""  {
 		tempvar temp_`inc'
 		gen `temp_`inc'' = .
@@ -734,9 +729,9 @@ program define convert_rank_dollar, rclass
 		replace `temp_`inc'' = 310782.3125 if _n ==101
 		}
 
-	* kir_26 late
+	* kir_26 late	
 	if "`kir_26_l'" != ""  {
-		tempvar temp_`inc'
+		tempvar temp_`inc'	
 		gen `temp_`inc'' = .
 		replace `temp_`inc'' = 0 if _n ==1
 		replace `temp_`inc'' = 0 if _n ==2
@@ -843,8 +838,8 @@ program define convert_rank_dollar, rclass
 
 	* parent income
 	if "`par_inc'" != ""  {
-		tempvar temp_`inc'
-		gen `temp_`inc'' = .
+		tempvar temp_`inc'	
+		gen `temp_`inc'' = .	
 		replace `temp_`inc'' = 0 if _n ==1
 		replace `temp_`inc'' = 2192.091552734375 if _n ==2
 		replace `temp_`inc'' = 3919.33203125 if _n ==3
@@ -958,7 +953,7 @@ program define convert_rank_dollar, rclass
 		* multiply by 100 if option specified
 		if "`multiply100'" !=""			local 1 = `1'*100
 
-		* summarize floor
+		* summarize floor 
 		summ `temp_`inc'' if `temp_percentile' == floor(`1')
 		local dollar_amount_floor = `r(mean)'
 
@@ -966,7 +961,7 @@ program define convert_rank_dollar, rclass
 		summ `temp_`inc'' if `temp_percentile' == ceil(`1')
 		local dollar_amount_ceil = `r(mean)'
 
-		* dollar amount
+		* dollar amount 
 		local dollar_amount = `dollar_amount_floor' + ((`1' - floor(`1')) * ///
 		(`dollar_amount_ceil' - `dollar_amount_floor'))
 		}
@@ -1008,7 +1003,7 @@ program define convert_rank_dollar, rclass
 		if "`multiply100'" !=""	{
 			local 1 = `1'*100
 			local 2 = `2'*100
-			}
+			}			
 
 		* summarize floor: mean MINUS SD
 		summ `temp_`inc'' if `temp_percentile' == floor(`1'-`2')
@@ -1034,7 +1029,7 @@ program define convert_rank_dollar, rclass
 		* dollar amount: mean PLUS SD
 		local dollar_amount_upper = `dollar_amount_floor_upper' + ///
 			(((`1' +`2') - floor(`1'+`2')) * ///
-			(`dollar_amount_ceil_upper' - `dollar_amount_floor_upper'))
+			(`dollar_amount_ceil_upper' - `dollar_amount_floor_upper'))	
 
 		* dollar amount
 		local dollar_amount = (`dollar_amount_upper' - `dollar_amount_lower')/2
@@ -1073,27 +1068,24 @@ program define convert_rank_dollar, rclass
 	ren `inc' dollar_ceiling
 	gen dollar_amount = dollar_floor + ((rank - rank_low) * ///
 		(dollar_ceiling - dollar_floor))
-	drop rank_low rank_high rank dollar_floor dollar_ceiling
+	drop rank_low rank_high rank dollar_floor dollar_ceiling	
 
 	}
-	}
-	if `base_obs'<101 {
-		keep if `orig'
 	}
 end
 
 
 /*
-*** CREATE CROSSWALK FILE
+*** CREATE CROSSWALK FILE 
 import delimited "${dropbox}/outside/finer_geo/interactive_tract_maps/output/pctile_to_dollar_cw.csv", clear
-
+	
 save  "${dropbox}/outside/finer_geo/data/raw/crosswalks/rank_dollar_ado_file.dta", replace
 use "${dropbox}/outside/finer_geo/data/raw/crosswalks/rank_dollar_ado_file.dta", clear
 qui: gen temp_kid_wageflex = .
 qui: gen temp_percentile = _n-1 in 1/101
 forval i= 1/101 {
 	qui: su kid_wageflex if _n == `i'
-	di "replace temp_inc = `r(mean)' if _n ==`i'"
+	di "replace temp_inc = `r(mean)' if _n ==`i'"  
 	}
 assert temp_kid_wageflex[_n] >= temp_kid_wageflex[_n-1]
 */

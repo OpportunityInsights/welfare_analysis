@@ -11,7 +11,7 @@ local programs 	ui_e_johnston 	///
 				ui_b_kroft_noto ///
 				ui_b_landais 	///
 				ui_b_meyer_hi 	///
-				ui_b_solon 		
+				ui_b_solon
 
 * Set file paths
 global data_derived "${welfare_dropbox}/Data/derived"
@@ -26,7 +26,7 @@ foreach prog in `programs' {
 	split assumptions, p(",")
 	ren assumptions1 spec
 	replace spec = subinstr(spec,"spec_type: table_","",.)
-	
+
 	*Subtract 1 from all cost figures to get FEs:
 	gen FE 		= cost - 1
 	gen l_FE 	= l_cost - 1
@@ -43,7 +43,7 @@ foreach prog in `programs' {
 		drop `var'
 		ren `var'_str `var'
 	}
-	
+
 	*Format confidence interval:
 	foreach x in FE WTP MVPF {
 		gen CI_`x' = "[" + l_`x' + ", " + u_`x' + "]"
@@ -59,17 +59,27 @@ foreach prog in `programs' {
 		ren `x' `x'1
 		ren CI_`x' `x'2
 	}
+
+	// getting the confidence intervals under the relevant point estimates
 	reshape long FE WTP MVPF, i(program spec) j(row)
+	// getting columns for each spec
 	reshape wide FE WTP MVPF, i(program row) j(spec) str
+
 	ren *DI *_DI
 	ren *no_DI *_no_DI
-	
-	*Format table:
+	rename *alt_crra *_alt_crra
+
+	// dropping unneeded columns
 	assert WTP_DI == WTP_no_DI
 	drop WTP_DI
 	ren WTP_no_DI WTP
-	keep 	program FE_no_DI FE_DI WTP MVPF_no_DI MVPF_DI
-	order 	program FE_no_DI FE_DI WTP MVPF_no_DI MVPF_DI
+	
+	assert FE_alt_crra==FE_no_DI
+	drop FE_alt_crra
+
+	*Format table:
+	keep 	program FE_no_DI FE_DI WTP MVPF_no_DI MVPF_DI WTP_alt_crra MVPF_alt_crra
+	order 	program FE_no_DI FE_DI WTP MVPF_no_DI MVPF_DI WTP_alt_crra MVPF_alt_crra
 
 	
 	*Save estimate files:
@@ -87,6 +97,6 @@ foreach prog in `programs' {
 		append using ``prog''
 	}
 	}
-	
+
 export excel "$output/UI.xlsx", sheetrep sheet("stata") first(variables)
 

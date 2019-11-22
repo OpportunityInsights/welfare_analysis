@@ -3,32 +3,33 @@
 *******************************************************************************/
 
 /*
-Schmieder, Johannes F. and Till M. von Wachter. 2016. “The Effects of Unemployment 
-Insurance Benefits: New Evidence and Interpretation.” Annual Review of Economics 
+Schmieder, Johannes F. and Till M. von Wachter. 2016. “The Effects of Unemployment
+Insurance Benefits: New Evidence and Interpretation.” Annual Review of Economics
 8: 547-581.
 
-Johnston, Andrew C. and Alexandre Mas. 2018. "Potential Unemployment Insurance 
-Duration and Labor Supply: The Individual and Market-Level Response to a Benefit 
+Johnston, Andrew C. and Alexandre Mas. 2018. "Potential Unemployment Insurance
+Duration and Labor Supply: The Individual and Market-Level Response to a Benefit
 Cut." Journal of Political Economy 126 (6): 2480-2522.
 
-Katz, Lawrence F. and Bruce D. Meyer. 1990. "The Impact of the Potential 
+Katz, Lawrence F. and Bruce D. Meyer. 1990. "The Impact of the Potential
 Duration of Unemployment Benefits on the Duration of Unemployment." Journal of
 Public Economics 41 (1): 45-72.
 
-Ganong, Peter and Pascal J. Noel. 2019. "Consumer Spending During Unemployment: 
+Ganong, Peter and Pascal J. Noel. 2019. "Consumer Spending During Unemployment:
 Positive and Normative Implications." NBER Working Paper No. 25417.
 
-Hendren, Nathaniel. 2017. “Knowledge of Future Job Loss and Implications for  
+Hendren, Nathaniel. 2017. “Knowledge of Future Job Loss and Implications for
 Unemployment Insurance.” American Economic Review 107 (7): 1778-1823.
 
-Mueller, Andreas I., Jesse Rothstein, and Till M. von Wachter. 2016. “Unemployment 
-Insurance and Disability Insurance in the Great Recession.” Journal of Labor 
+Mueller, Andreas I., Jesse Rothstein, and Till M. von Wachter. 2016. “Unemployment
+Insurance and Disability Insurance in the Great Recession.” Journal of Labor
 Economics 34 (S1): S445-S475.
 */
 
 ********************************
 /* 1. Pull Global Assumptions */
 *********************************
+global payroll_assumption = "no"
 local cons_source = "$cons_source" //estimate used for consumption drop
 local FE_source = "$FE_source" //estimate used for FE
 
@@ -48,15 +49,15 @@ local DI_incl_med = "$DI_incl_med"  //"yes" or "no" (including Medicare benefits
 * Drops in consumption (WTP) - Schmieder and von Wachter 2016, Table 3:
 
 	//Cochrane 1991:
-	//NOTES: 	Schmieder and von Wachter use the midpoint of the two estimates in 
-	//			Table 2 (which reports estimates and t-stats). To get the corresponding 
+	//NOTES: 	Schmieder and von Wachter use the midpoint of the two estimates in
+	//			Table 2 (which reports estimates and t-stats). To get the corresponding
 	//			SE, we assume (to be conservative) that the two estimates are
 	//			perfectly correlated.
 	local cons_cochrane = 0.255
 	local cons_cochrane_se = 0.5*sqrt((0.2403/4.95)^2 + (0.2674/7.81)^2 + 2*(0.2403/4.95)*(0.2674/7.81))
 
 	//Gruber 1997:
-	//NOTES: 	Consumption drop is from Gruber 1994, Table 1. Treating the term in 
+	//NOTES: 	Consumption drop is from Gruber 1994, Table 1. Treating the term in
 	//			parentheses in that table as a SD and not SE and dividing by the
 	//			square root of the sample size (n=1604) accordingly.
 	local cons_gruber = 0.068
@@ -77,7 +78,7 @@ local DI_incl_med = "$DI_incl_med"  //"yes" or "no" (including Medicare benefits
 	local cons_chetty_szeidl_se = 0.024
 
 
-	//Rothstein and Valletta 2014 
+	//Rothstein and Valletta 2014
 	//NOTES:	Schmieder/von Wachter's consumption drop estimates are based on
 	//			income drops for the full 2001/2008 panels in the working paper
 	//			version (cited in text, shown in Figure 5, but no corresponding
@@ -103,7 +104,7 @@ local DI_incl_med = "$DI_incl_med"  //"yes" or "no" (including Medicare benefits
 
 *Fiscal externalities from duration extensions - Schmieder and von Wachter 2016, Table 1:
 //NOTE: Schmieder and von Wachter have two FE estimates for each paper, one assuming
-//		that lost labor income from employment is valued by the government at the 
+//		that lost labor income from employment is valued by the government at the
 //		payroll tax rate (3%), one assuming that it is valued at the full labor
 //		income tax rate. The latter matches what we use elsewhere and is conceptually
 //		correct if we assume the government has a global, and not UI-only, budget
@@ -114,7 +115,7 @@ local DI_incl_med = "$DI_incl_med"  //"yes" or "no" (including Medicare benefits
 	//			policy simulations on their data. For both extensions and benefits,
 	//			there is a single model parameter - and so, given that we don't
 	//			have the underlying data, we assume that the t-stat for the elasticity
-	//			underlying S/vW's FE estimate is the same as the t-stat for that 
+	//			underlying S/vW's FE estimate is the same as the t-stat for that
 	//			parameter in their model. Source: Table 2, Column 2.
 	local FE_katz_meyer_full = 1.89
 	local FE_katz_meyer_full_se = `FE_katz_meyer_full'/(0.0247/0.0153)
@@ -123,14 +124,14 @@ local DI_incl_med = "$DI_incl_med"  //"yes" or "no" (including Medicare benefits
 	//NOTES:	Schmieder/von Wachter base their FE estimates on the 2015 working paper,
 	//			while the published version of the paper has duration elasticity
 	//			estimates that are slightly smaller. To account for this, we scale
-	//			S/vW's FE estimates by the ratio of the underlying estimates in the 
+	//			S/vW's FE estimates by the ratio of the underlying estimates in the
 	//			two versions of the paper, and assume that the t-state for the FE is the
 	//			same as in the published version. Source: Table 3.
 	local FE_johnston_full = 0.69 * (7.19/8.697)
 	local FE_johnston_full_se = `FE_johnston_full'/(7.19/0.818)
 
 *Share of information revealed *prior* to the onset of unemployment - Hendren 2007, Appendix Table I:
-local revealed_info_tm1 = 0.1968 
+local revealed_info_tm1 = 0.1968
 local revealed_info_tm1_se = 0.0120
 
 *Estimates for timepath of consumption during unemployment - using
@@ -162,10 +163,10 @@ if "`bootstrap'" == "yes" {
 		preserve
 			use "${input_data}/causal_estimates/${folder_name}/draws/ui_e.dta", clear
 
-			qui ds draw_number, not 
-			
+			qui ds draw_number, not
+
 			global estimates_${name} = r(varlist)
-			
+
 			mkmat ${estimates_${name}}, matrix(draws_${name}) rownames(draw_number)
 		restore
 	}
@@ -178,7 +179,7 @@ if "`bootstrap'" == "yes" {
 if "`bootstrap'" != "yes" {
 	preserve
 		import delimited "${input_data}/causal_estimates/${folder_name}/ui_e.csv", clear
-		
+
 		levelsof estimate, local(estimates)
 		foreach est in `estimates' {
 			qui su pe if estimate == "`est'"
@@ -194,7 +195,7 @@ local FE_est "FE_`FE_source'_`FE_assumption'"
 /* 3. Exact Inputs from Paper  */
 *********************************
 
-*Average UI weekly amount - Mueller, Rothstein, von Wachter (2016), p. 9 ("weekly 
+*Average UI weekly amount - Mueller, Rothstein, von Wachter (2016), p. 9 ("weekly
 *UI payments average around $300"), confirmed in UI program data at dol.gov.
 local avg_weekly_ui = 300
 
@@ -207,7 +208,7 @@ local DI_approval_prob = 0.60
 *Figures from von Wachter, Song, and Manchester (2011), Web Appendix G used in
 *calculating spillovers from reduced DI applications (all figures for men from
 *Appendix Table G3, for women from Appendix Table G4):
-//NOTES:	For now, we are using vWSM's average values for all 1997 male/female  
+//NOTES:	For now, we are using vWSM's average values for all 1997 male/female
 //			new DI applicants and will combine these values below using the gender
 //			shares in their data. We thus assume that UI recipients who are induced
 //			not to apply to DI by additional benefits have the same characteristics
@@ -236,10 +237,10 @@ if "`FE_source'"=="johnston"{
 	local ind_income = `quarters_in_year' * `quarter_wage'
 	local earn_year = 2011  //Table 1
 	*Paper does not indicate year but 2011 would be sensible since that is the year in which earnings are measured
-	local earn_USD_year = 2011 
+	local earn_USD_year = 2011
 }
 if "`FE_source'"=="katz_meyer"{
-	**These measures are based on the PSID sample rather than the Moffit sample 
+	**These measures are based on the PSID sample rather than the Moffit sample
 	local weeks_work_per_year = 50 //assumption
 	local hours_worked_per_wk = 40 //assumption
 	local wage_per_hour = 7.95 //Table 1, UI = 1
@@ -269,14 +270,14 @@ local cons_exhaust_scale = -`gn_monthly_ch'*(26/4)
 
 
 *PDV of SSDI benefits and lost earnings:
-//NOTES:	MRvW's estimates are for the increase in DI applications from 
+//NOTES:	MRvW's estimates are for the increase in DI applications from
 //			UI exhaustions, not for an increase in the lifetime probability
 //			of EVER applying for DI. To allow for the possibility that
-//			UI delays, but does not fully prevent, DI application, we use the 
+//			UI delays, but does not fully prevent, DI application, we use the
 //			parameter $DI_disp to scale the amount of time additional UI benefits
-//			displace DI applications (where 1 = full displacement and 0 = no 
+//			displace DI applications (where 1 = full displacement and 0 = no
 //			displacement). Our procedure for the PDV calculations is as follows:
-//			a.	For each of men and women, back out the implied per-period flow 
+//			a.	For each of men and women, back out the implied per-period flow
 //				(assuming it's constant) from the vSWM PDVs (which use a 3% annual
 //				discount rate). Since they experess average time on DI to the 0.1
 //				place, we use tenths of a year.
@@ -297,32 +298,32 @@ foreach x in di_ben_nomed di_ben_med {
 		forval i = 0/`endpd' {
 			local cumul_disc = `cumul_disc' + (1/(1.03^0.1))^(`i')
 		}
-		
+
 		//Implied per-period flow:
 		local `x'_flow_`s' = ``x'_pdv_`s''/`cumul_disc'
-		
+
 		//Rescale time:
 		local di_dur_rescale_`s' = `DI_disp'*`di_dur_`s''
-		local endpd_rescale = `di_dur_rescale_`s''-1 
-		
+		local endpd_rescale = `di_dur_rescale_`s''-1
+
 		//Recompute PDV:
 		local `x'_pdv_rescale_`s'= 0
 		forval i = 0/`endpd_rescale' {
 			local `x'_pdv_rescale_`s' = ``x'_pdv_rescale_`s'' + ``x'_flow_`s''*(1/((1+`discount_rate')^0.1))^(`i')
 		}
-		
+
 	}
 	//Compute average PDV:
-	local `x'_pdv_1997 = `di_share_m' * ``x'_pdv_rescale_m' + (1-`di_share_m') * ``x'_pdv_rescale_f' 
-	
+	local `x'_pdv_1997 = `di_share_m' * ``x'_pdv_rescale_m' + (1-`di_share_m') * ``x'_pdv_rescale_f'
+
 	//Inflation-adjust:
 	deflate_to 2008, from(1997)
 	local deflator = r(deflator)
 	local `x'_pdv =  ``x'_pdv_1997' * `deflator'
-	
+
 }
 
-*Compute per-dollar total cost of DI (inclusive of behavioral responses) using 
+*Compute per-dollar total cost of DI (inclusive of behavioral responses) using
 *DI_examiner.do:
 //For now, using average tax wedge for U.S. in 2015 to match Schmieder/von Wachter's
 //FE estimates for UI. (Source: https://stats.oecd.org/Index.aspx?QueryId=55129).
@@ -343,10 +344,10 @@ foreach x in nomed med {
 *FEs from reduced DI applications:
 //NOTES:	The MRvW (2016) estimate above is the elasticity of monthly SSDI applications
 //			to monthly UI exhaustions. Thus, we consider a hypothetical experiment
-//			where UI benefits are extended by one month. We assume that this extension 
+//			where UI benefits are extended by one month. We assume that this extension
 //			*prevents* `DI_job_finding' percent of UI-exhaustee-to-DI individuals
-//			from *exhausting* their benefits (since they are able to find a job 
-//			during the four-week extension). Per MRvW, "there are about 
+//			from *exhausting* their benefits (since they are able to find a job
+//			during the four-week extension). Per MRvW, "there are about
 //			one-fifth as many SSDI applications as UI exhaustions in a typical month" (p.25),
 //			so using this to get the change in the probability of SSDI application.
 if  "`DI_incl_med'" == "yes" {
@@ -405,3 +406,5 @@ global inc_year_stat_`1' = `earn_year'
 global inc_year_benef_`1' = `earn_year'
 global inc_age_benef_`1' = `age_benef'
 global inc_age_stat_`1' = `age_stat'
+
+macro drop payroll_assumption

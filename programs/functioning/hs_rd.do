@@ -202,7 +202,22 @@ if "$got_ludwig_cost"!="yes" {
 	global ludwig_tuition_cost = r(tuition)
 	global got_ludwig_cost = "yes"
 }
-deflate_to `usd_year', from(`=round(`reform_year'+18-`reform_age')')
+
+
+// note that the earliest data available for the cost of college function are from 1987
+// if the year entered is earlier than 1987, the cost is calculated in 1987. Thus,
+// we also want to deflate to 1987 in such cases. 
+if `=round(`reform_year'+18-`reform_age')' < 1987 {
+	local deflate_year = 1987
+	}
+else {
+	local deflate_year = `=round(`reform_year'+18-`reform_age')'
+	}
+	
+di `deflate_year'
+
+
+deflate_to `usd_year', from(`deflate_year')
 local govt_college_cost = 0
 local priv_college_cost = 0
 forval i = 1/`years_enroll'{

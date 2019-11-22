@@ -1,8 +1,9 @@
 ********************************************************************************
-*					     PREPARE CORRECTED ESTIMATES				 		   *
+*						PREPARE CAUSAL ESTIMATES							   *
 ********************************************************************************
 set matsize 2000
 * Set file paths
+global welfare_git "${github}/Welfare"
 global welfare_dropbox "${welfare_files}"
 global assumptions "${welfare_dropbox}/MVPF_Calculations/program_assumptions"
 global program_folder "${welfare_git}/programs/functioning"
@@ -144,11 +145,11 @@ di `count_0_restricted'
 
 
 * run the matlab script
-cd "${welfare_git}/pub_bias"
+cd "${welfare_git}/pub_bias/code_and_data_2019/Matlab"
 shell matlab -nodisplay -nosplash -nodesktop -r "selection_welfare('${welfare_git}','${welfare_dropbox}');exit;"
 
 * make sure the script has time to run
-noi di "Pausing whilst publication bias script runs in Matlab, please wait for it to finish before continuing"
+noi di as err "Pausing whilst publication bias script runs in Matlab, please wait for it to finish before continuing"
 pause on
 pause
 

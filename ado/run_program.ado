@@ -1,4 +1,6 @@
 * Load assumptions and run a welfare program
+* Warning: This ado-file will not properly run programs ending in "_*"
+*	   because the assumptions files are not loaded correctly.
 
 cap program drop run_program
 
@@ -7,16 +9,18 @@ program define run_program, rclass
 syntax anything(name=program id="Program") 
 
 * Set file paths
-global assumptions "${welfare_files}/MVPF_Calculations/program_assumptions"
+global welfare_git "${github}/Welfare"
+global welfare_dropbox "${welfare_files}"
+global assumptions "${welfare_dropbox}/MVPF_Calculations/program_assumptions"
 global program_folder "${welfare_git}/programs/functioning"
 global ado_files "${welfare_git}/ado"
-global data_derived "${welfare_files}/Data/derived"
-global input_data "${welfare_files}/data/inputs"
+global data_derived "${welfare_dropbox}/Data/derived"
+global input_data "${welfare_dropbox}/data/inputs"
 global correlation=1
+local ado_files : dir "${github}/welfare/ado" files "*.ado"
 
-local ado_files : dir "${welfare_git}/ado" files "*.ado"
 foreach file in `ado_files' {
-	if regexm("`file'","run_program")==0 do "${welfare_git}/ado/`file'"
+	if regexm("`file'","run_program")==0 do "${github}/welfare/ado/`file'"
 }
 local program = lower("`program'")
 
@@ -54,12 +58,12 @@ foreach type in earnsupp educ jobsearch mixed timelim workexp {
 
 
 preserve
-	import excel "${welfare_files}/MVPF_Calculations/program_assumptions/default_assumptions.xlsx", clear first
+	import excel "${welfare_dropbox}/MVPF_Calculations/program_assumptions/default_assumptions.xlsx", clear first
 	ds
 	foreach assumption in `r(varlist)' {
 		global `assumption' = `assumption'[1]
 	}
-	import excel "${welfare_files}/MVPF_Calculations/program_assumptions/`assumption_name'.xlsx", clear first
+	import excel "${welfare_dropbox}/MVPF_Calculations/program_assumptions/`assumption_name'.xlsx", clear first
 	keep if spec_type=="baseline"
 	qui count
 	assert r(N)==1
@@ -77,6 +81,6 @@ if (strpos("`program'", "cpc")) & regexm("`program'","ui")==0 {
 }
 global draw_number = 0
 
-do "${welfare_git}/programs/functioning/`do_file'.do" `program' no uncorrected
+do "${github}/welfare/programs/functioning/`do_file'.do" `program' no uncorrected
 
 end

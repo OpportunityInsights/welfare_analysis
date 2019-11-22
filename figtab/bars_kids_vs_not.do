@@ -72,7 +72,22 @@ tw 	(bar mvpf x if id == 2, barwidth(0.7) color("$secondcolour")) ///
 	xtitle("") $title
 
 graph export "${output}/bar_impacts_kids_vs_not.${img}", replace
-
+* no legend version to avoid slide jiggle
+if "${version}" == "slides" {
+	tw 	(bar mvpf x if id == 2, barwidth(0.7) color("$secondcolour")) ///
+		(bar mvpf x if id == 1, barwidth(0.7) color("$basecolour")) ///
+		(rcap l_mvpf_efron u_mvpf_efron x , lcolor(gs6)), ///
+		$ytitle $ylabel ///
+		xlabel(1.5 "AFDC" 	///
+		3.5 `""Housing" "Vouchers" "AFDC""' 	///
+		5.5 `""Housing""Vouchers""Chicago""' 	///
+		7.5 `""Negative""Income""Tax""' ///
+		9.5 `"WIC"') ///
+		 yline(6, lcolor(green%50) lwidth(0.15)) ///
+		legend(off) ///
+		xtitle("") $title
+		graph export "${output}/bar_impacts_kids_vs_not_nolegend.${img}", replace
+}
 *-------------------------------------------------------------------------------
 * Panel B : EITC OBRA93 baseline with no kid impacts and potential kid impacts
 *-------------------------------------------------------------------------------

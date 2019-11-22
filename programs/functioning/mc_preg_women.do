@@ -8,13 +8,13 @@ The effect of medicaid expansions in the late 1980s and early 1990s on the labor
 supply of pregnant women
 American Journal of Health Economics, 1(2), 165-193.
 
-Miller, S., & Wherry, L. R. (2018). 
-The long-term effects of early life Medicaid coverage. 
+Miller, S., & Wherry, L. R. (2018).
+The long-term effects of early life Medicaid coverage.
 Journal of Human Resources, 0816_8173R1.
 
-Currie, J., & Gruber, J. (1996). 
+Currie, J., & Gruber, J. (1996).
 Saving babies: The efficacy and cost of recent changes in the Medicaid eligibility
-of pregnant women. 
+of pregnant women.
 Journal of political Economy, 104(6), 1263-1296.
 */
 
@@ -31,9 +31,14 @@ local tax_rate_cont = $tax_rate_cont
 local tax_rate = $tax_rate_cont
 local payroll_assumption = "$payroll_assumption" // "yes" or "no"
 local discount_rate = $discount_rate
-local proj_age = $proj_age 
+local proj_age = $proj_age
 local MW_spec = $MW_spec
-local stat_value_life2012 = ${VSL_2012_USD} 
+local stat_value_life2012 = ${VSL_2012_USD}
+
+/* "perc" or "exp" - determines which approximation method is used for
+   causal effects. "perc" is the default. */
+local log_calc_method = "$log_calc_method"
+assert "`log_calc_method`" != ""
 
 *********************************
 /* 2. Causal Inputs from Paper */
@@ -45,7 +50,7 @@ local level_effect_hospital = -.2370 //Miller and Wherry (2018), Table 4 col (1)
 local level_effect_hospital_se = .109
 /*per 100 pp increase in prenatal eligibility*/
 *Later life income benefits
-if `MW_spec' == 1 { //This is the specification from Currie Gruber 
+if `MW_spec' == 1 { //This is the specification from Currie Gruber
 	local inc_effects_ch_log = .116 //Miller and Wherry (2018), Table 5
 	local inc_effects_ch_log_se = .033
 }
@@ -64,7 +69,7 @@ local infant_mort_effect_se =.691
 local mother_lfp_impact = -0.219 // Dave et al. (2015) table 2
 local mother_lfp_impact_se = 0.065
 local some_coll_effect = 0.035 // Miller and Wherry (2018), Table 5
-local some_coll_effect_se = 0.01 
+local some_coll_effect_se = 0.01
 
 */
 
@@ -80,9 +85,9 @@ if "`bootstrap'" == "yes" {
 	if ${draw_number} ==1 {
 		preserve
 			use "${input_data}/causal_estimates/${folder_name}/draws/${name}.dta", clear
-			qui ds draw_number, not 
+			qui ds draw_number, not
 			global estimates_${name} = r(varlist)
-			
+
 			mkmat ${estimates_${name}}, matrix(draws_${name}) rownames(draw_number)
 		restore
 	}
@@ -194,7 +199,7 @@ deflate_to `usd_year', from(2012)
 local stat_value_life = 1000000*`stat_value_life2012'*r(deflator)
 
 *Age and year calcs for projections
-local earn_begin_year = `first_birth_year'+`young_age_earn' 
+local earn_begin_year = `first_birth_year'+`young_age_earn'
 local old_age_earn = `earn_end_year' - `first_birth_year'
 local avg_age_earn = round((`young_age_earn' + `old_age_earn')/2)
 local proj_start_age = `old_age_earn'+1
@@ -222,9 +227,25 @@ local year_save_hospital_d = -`level_effect_hospital'*`avg_cost_hospital_d'
 local gov_yr_save_hospital_d = `year_save_hospital_d'*`percent_cov_public_ins'
 
 *Child income effects
-local cfactual_earn = `mean_earn'/(1+(`pp_increase_elig'/100)*`inc_effects_ch_log') 
-*30% increase in eligibility -> 30% of sample treated
-local income_effect_level= `inc_effects_ch_log'*`cfactual_earn'
+if "`log_calc_method'" == "perc" {
+	local cfactual_earn = `mean_earn' / (1 + (`pp_increase_elig' / 100) * ///
+						  `inc_effects_ch_log')
+
+	local income_effect_level= `inc_effects_ch_log' * `cfactual_earn'
+}
+else if "`log_calc_method'" == "exp" {
+	local log_mean_earn = log(`mean_earn')
+	local log_cfactual_earn = `log_mean_earn' - ///
+							  (`pp_increase_elig' / 100) * ///
+							  `inc_effects_ch_log'
+	local cfactual_earn = exp(`log_cfactual_earn')
+	*30% increase in eligibility -> 30% of sample treated
+	local income_effect_level = exp(`log_cfactual_earn' + ///
+									`inc_effects_ch_log') - ///
+								`cfactual_earn'
+}
+else exit 9
+
 di `usd_year'
 
 *Get tax rate for kids
@@ -262,7 +283,7 @@ di `=`first_birth_year'+18'
 di ${mw_year_college_cost} - ${mw_tuition_cost}
 di `govt_college_cost'
 
-*Crowding out 
+*Crowding out
 local save_crowd_out = `crowd_out_pri_insur'*`cost_per_child_unadjusted'
 
 *Mortality
@@ -284,7 +305,7 @@ if "`tax_rate_assumption'"=="cbo" {
 		forecast_income(yes) ///
 		program_age(`age_parent') ///
 		earnings_type(individual)
-		
+
 	local tax_rate_mother = r(tax_rate)
 	di r(pfpl)
 }
@@ -295,7 +316,7 @@ local mother_tax_impact = `tax_rate_mother'*`mother_earn_effect'
 
 *Intermediate calculations based on type and length of projection
 local earn_impact_obs = 0
-forval i = `adult_start_year_earn'/`=`adult_start_year_earn' + `sample_period_earn'' {
+forval i = `adult_start_year_earn'/`=`adult_start_year_earn' + `sample_period_earn' - 1' {
 	local earn_impact_obs = `earn_impact_obs'+`income_effect_level'/((1+`discount_rate')^(`i'))
 }
 
@@ -316,7 +337,7 @@ if "`proj_type'" == "observed"{
 
 	local FE = `FE_tax_`=`adult_start_year_earn' + `sample_period_earn''' + ///
 		`FE_hospital_`=`adult_start_year_health' + `sample_period_health'''
-		
+
 	local earn_impact = `earn_impact_obs'
 }
 
@@ -326,19 +347,19 @@ if "`proj_type'" == "growth forecast" {
 	di `mean_earn'
 	di `income_effect_level'
 	di `avg_age_earn'-`proj_start_age'+`proj_year'
-	
+
 	est_life_impact `income_effect_level', ///
 		impact_age(`avg_age_earn') project_age(`proj_start_age') end_project_age(`proj_age') ///
 		project_year(`proj_year') usd_year(`usd_year') ///
 		income_info(`cfactual_earn') income_info_type(counterfactual_income) ///
 		earn_method($earn_method) tax_method($tax_method) transfer_method($transfer_method) ///
 		max_age_obs(`=`adult_start_year_earn'+`sample_period_earn'-1')
-		
+
 	local years_back_to_spend = `proj_start_age' + 1
 
 	local earn_proj = (((1/(1+`discount_rate'))^`years_back_to_spend') * r(tot_earn_impact_d))
 	local increase_taxes_proj = `tax_rate' * `earn_proj'
-	
+
 	*Get fiscal externalities by year for graphs
 	forval j = 0/100 {
 		local FE_tax_`j' = 0 //just to avoid missing local errors - gets ovewritten where appropriate
@@ -351,7 +372,7 @@ if "`proj_type'" == "growth forecast" {
 		local FE_tax_`j' = `FE_tax_`=`proj_start_age'-1'' + ///
 			`tax_rate'* ${aggt_earn_impact_a`j'}*(1/(1+`discount_rate'))^`years_back_to_spend'
 	}
-	
+
 	local FE_tax_long = `increase_taxes_proj' + `FE_tax_`=`proj_start_age'-1''
 
 	local earn_impact = `earn_impact_obs' + `earn_proj'
@@ -490,7 +511,7 @@ di `cost_per_child_elig_adjusted' // cost adjusting for uncompensated care savin
 *Cost globals for decomposition
 global mw_eligibility_adjustment = `cost_per_child_unadjusted' - `cost_per_child_elig_adjusted'
 global mw_mum_tax_impact =  `mother_tax_impact' // total tax impact
-global mw_unadjusted_cost = `cost_per_child_unadjusted' 
+global mw_unadjusted_cost = `cost_per_child_unadjusted'
 global mw_hosp_cost= `FE_hospital_long'
 global mw_college_cost = `govt_college_cost'
 global mw_tax_save = `FE_tax_long'
@@ -499,8 +520,8 @@ global mw_tax_save = `FE_tax_long'
 global mw_wtp = `WTP'
 global mw_par_crowd_out = `save_crowd_out'
 global mw_vsl_ben = `VSL_benefits'
-global mw_earn_ben_obs = (1-`tax_rate')*`earn_impact_obs' 
-global mw_earn_ben_proj = (1-`tax_rate')*`earn_proj' 
+global mw_earn_ben_obs = (1-`tax_rate')*`earn_impact_obs'
+global mw_earn_ben_proj = (1-`tax_rate')*`earn_proj'
 global mw_coll_priv_cost = `priv_college_cost'
 
 *Estimates for Government cost decomposition
@@ -516,16 +537,13 @@ di `cost_per_child_elig_adjusted'
 di `program_cost'
 
 *Estimates for Willingness to Pay Decomp
- di `save_crowd_out'
- di `VSL_benefits'
+di `save_crowd_out'
+di `VSL_benefits'
 di `priv_college_cost'
- di (1-`tax_rate')*`earn_impact_obs'
- di (1-`tax_rate')*(`earn_impact'-`earn_impact_obs')
- di `WTP'
+di (1-`tax_rate')*`earn_impact_obs'
+di (1-`tax_rate')*(`earn_impact'-`earn_impact_obs')
+di `WTP'
 
- 
- 
- 
 di `cost_hospital_d'
 di `avg_age_health'
 di `avg_cost_hospital_d'

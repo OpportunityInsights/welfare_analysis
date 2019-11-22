@@ -14,13 +14,11 @@ replace program = lower(program)
 keep if prog_type !=""
 
 merge 1:1 program using "${welfare_files}/data/derived/all_programs_extendeds_corr_1.dta", ///
-		keepusing(age_benef year_implementation) 
-		
+		keepusing(age_benef year_implementation) assert(master match) keep(match) nogen
+
 *Drop  non-sample MTO & taxes
 drop if prog_type=="Top Taxes" & main_spec==0
 drop if regexm(prog_type,"MTO") & main_spec==0		
-assert _merge==3
-drop _merge
 		
 g baseline = main_spec==1
 g restricted = main_spec==1 & (earnings_type==""|earnings_type=="observed")

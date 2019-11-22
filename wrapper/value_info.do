@@ -71,8 +71,6 @@ global output "${data_derived}/infovalue"
 cap mkdir "$output"
 global data_derived "${welfare_files}/Data/derived"
 
-local replications 1000
-
 *-------------------------------------------------------------------------------
 *Experiment A: SNAP admin data
 *-------------------------------------------------------------------------------
@@ -80,7 +78,7 @@ local replications 1000
 local q = 0
 *loop over different WTP valuations
 foreach mode in post_tax cost {
-	use "${data_derived}/snap_intro_normal_estimates_`replications'_replications.dta", clear
+	use "${data_derived}/snap_intro_normal_estimates_1000_replications.dta", clear
 	local ++q
 	renvars *, lower
 	g spec_n = _n
@@ -105,7 +103,7 @@ foreach mode in post_tax cost {
 			local cost_`type' = cost[1]
 			assert _N==1
 			su spec_n
-			use "${data_derived}/snap_intro_normal_`replications'_draws_spec_`=r(mean)'.dta", clear
+			use "${data_derived}/snap_intro_normal_1000_draws_spec_`=r(mean)'.dta", clear
 			renvars *, lower
 			*Normalise draws
 			replace wtp = wtp / `prog_cost_`type''
@@ -209,6 +207,16 @@ g v_max_ii = (max(admin_p,0)-max(psid_p,0))/(1+max(admin_p,0))
 g v_oracle_i = max(oracle_p,0)-max(psid_p,0)
 g v_oracle_ii = (max(oracle_p,0)-max(psid_p,0))/(1+max(oracle_p,0))
 
+/* 
+Evidence that v_max_ii is calculated correctly:
+
+v_max_ii = (admin_p - psid_p)/(1+admin_p) can be rearranged to be
+(1-v_max_ii) * admin_p - v_max_ii = psid_p which matches equation (11)
+since admin_p = utility(census info) * 1 {wtp_c > cost_c} and
+psid_p = utility(psid info) * 1 {wtp_psid > cost_psid} 
+
+*/
+
 save "${data_derived}/infovalue/value_of_information_experiment_A.dta", replace
 
 *-------------------------------------------------------------------------------
@@ -259,8 +267,8 @@ local k = 0
 local neg_cost_progs ""
 foreach program in `programs' {
 	local ++k
-	if `k'==1 use "${data_derived}/`program'_baseline_`replications'_draws_corr_1.dta", clear
-	else merge 1:1 draw_id using "${data_derived}/`program'_baseline_`replications'_draws_corr_1.dta", assert(3) nogen
+	if `k'==1 use "${data_derived}/`program'_baseline_1000_draws_corr_1.dta", clear
+	else merge 1:1 draw_id using "${data_derived}/`program'_baseline_1000_draws_corr_1.dta", assert(3) nogen
 	renvars *, lower
 	foreach var in wtp cost {
 		replace `var'_`program' = `var'_`program' / `pc_`program''

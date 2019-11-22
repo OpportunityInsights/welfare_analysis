@@ -331,7 +331,8 @@ if "`wtp_valuation'" == "cost" {
 }
 
 if "`wtp_valuation'" == "private_cost" {
-	local WTP = `discount_priv'
+	// conservative WTP estimate
+	local WTP =  1
 }
 
 /*
@@ -464,7 +465,7 @@ di "Projected tax impact: `=((1/(1+`discount_rate'))^(`proj_start_age'-18))*`tax
 
 
 *Components for WTP:
-global fiu_lbwtp = `discount_priv'
+global fiu_lbwtp = 1
 global fiu_priv_cost = `discount_priv'
 global fiu_short_post_tax = (1-`tax_rate_short')*`short_earning'
 global fiu_med_post_tax =  (1-`tax_rate_medium')*`medium_earning'

@@ -240,8 +240,10 @@ local avg_total_hope_amt_disc = (`mean_public_2yr'/`mean_hope_elig')*`hope_amt_2
 
 *As noted above, assuming takeup is eligibility discontinuity multiplied by share of HOPE-eligible enrollment:
 local program_cost_unscaled = `hope_firststage'*`mean_hope_elig'*`avg_total_hope_amt_disc'
-local program_cost = (`hope_firststage'*`mean_hope_elig'*`avg_total_hope_amt_disc') - (`hope_firststage'*`avg_total_hope_amt_disc'*(-`public_2yr_effect'))
-
+local program_cost = `program_cost_unscaled' - ///
+					 `hope_firststage' * (-`public_2yr_effect') * ///
+					 ((`hope_amt_4yr' * `enrollment_time_4yr_disc') - ///
+					 (`hope_amt_2yr' * `enrollment_time_2yr_disc'))
 
 *Calculate additional college cost of shift in enrollment (per shifter) above actual HOPE scholarship
 *received by shifters:
@@ -260,7 +262,9 @@ if "${got_tenn_hope_costs}"!="yes" {
 deflate_to `usd_year', from(2008)
 local chg_total_cost_of_college = r(deflator)* (${tn_cost_of_college_4yr}*`enrollment_time_4yr_disc' - ${tn_cost_of_college_2yr}*`enrollment_time_2yr_disc')
 local priv_cost_impact = r(deflator)*`share_private'* (${tn_tuition_4yr}*`enrollment_time_4yr_disc' - ${tn_tuition_2yr}*`enrollment_time_2yr_disc')
-local enroll_cost = `chg_total_cost_of_college' - `priv_cost_impact' - `enrollment_time_4yr_disc'*`hope_amt_4yr' //Final term is to avoid double-counting HOPE from program cost.
+local enroll_cost = `chg_total_cost_of_college' - `priv_cost_impact' - ///
+					(`enrollment_time_4yr_disc' * `hope_amt_4yr' - ///
+					`enrollment_time_2yr_disc' * `hope_amt_2yr')
 
 *Compute total cost:
 local total_cost = `program_cost_unscaled' + (`enroll_cost' - `increase_taxes')*(-`public_2yr_effect')

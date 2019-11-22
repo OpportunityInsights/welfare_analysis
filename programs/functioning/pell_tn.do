@@ -3,8 +3,8 @@
 *******************************************************************************/
 
 /*
-Carruthers, C. K., & Welch, J. G. (2019). 
-"Not whether, but where? Pell grants and college choices." 
+Carruthers, C. K., & Welch, J. G. (2019).
+"Not whether, but where? Pell grants and college choices."
 Journal of Public Economics, 172, 1-19.
 
 *Use discontinuity in Pell Grant eligibility to determine grant impacts on enrollment.
@@ -16,15 +16,15 @@ Journal of Public Economics, 172, 1-19.
 ********************************
 
 local discount_rate = $discount_rate
-local tax_rate_assumption = "$tax_rate_assumption" 
+local tax_rate_assumption = "$tax_rate_assumption"
 local tax_rate_cont = $tax_rate_cont
-local proj_type = "$proj_type" 
+local proj_type = "$proj_type"
 local proj_age = $proj_age
-local wtp_valuation = "$wtp_valuation" 
-local val_given_marginal = $val_given_marginal 
+local wtp_valuation = "$wtp_valuation"
+local val_given_marginal = $val_given_marginal
 
-local tax_rate_assumption = "$tax_rate_assumption" 
-local payroll_assumption = "$payroll_assumption" 
+local tax_rate_assumption = "$tax_rate_assumption"
+local payroll_assumption = "$payroll_assumption"
 if "`tax_rate_assumption'" ==  "continuous" {
 	local tax_rate_longrun  = $tax_rate_cont
 	local tax_rate_shortrun = $tax_rate_cont
@@ -39,8 +39,6 @@ local years_enroll_cc = $years_enroll_cc
 *********************************
 /* 2. Estimates from Paper */
 *********************************
-
-
 /*
 local enroll_effect_4yr_pub_tn = -0.0092
 local enroll_effect_4yr_pub_tn_se = 0.0123
@@ -82,9 +80,9 @@ if "`bootstrap'" == "yes" {
 	if ${draw_number} ==1 {
 		preserve
 			use "${input_data}/causal_estimates/${folder_name}/draws/${name}.dta", clear
-			qui ds draw_number, not 
+			qui ds draw_number, not
 			global estimates_${name} = r(varlist)
-			
+
 			mkmat ${estimates_${name}}, matrix(draws_${name}) rownames(draw_number)
 		restore
 	}
@@ -105,8 +103,6 @@ if "`bootstrap'" != "yes" {
 	restore
 }
 
-
-
 *****************************************************
 /* 3. Exact Inputs + Assumptions from Paper */
 *****************************************************
@@ -124,13 +120,13 @@ local proj_short_end = 24
 local impact_age = 21
 local project_year = `year_policy' // policy change is for 2005 winners
 local impact_year = `project_year' + `impact_age'-`proj_start_age'
-	
+
 *Assumptions of Age for Earnings Gain Projection
 local proj_start_age_pos = 25
 local impact_age_pos = 34
 local project_year_pos = `project_year' + `proj_start_age_pos'-`proj_start_age'
 local impact_year_pos = `project_year_pos' + `impact_age_pos'-`proj_start_age_pos'
-	
+
 local p_attend_college = 0.805 // Carruthers & Welch (2019) table 1, column 4 (bandwidth restricted sample)
 
 local p_2yr_tn = 0.374 		// Carruthers & Welch (2019) table 2, column 2 (bandwidth restricted sample)
@@ -157,8 +153,8 @@ local parent_income = 45000*r(deflator)
 
 * impact of changing Pell threshold by 1 dollar on total undergraduate aid
 local fut_pell_1 = 1.04 // Carruthers & Welch (2019) Page 7
-local fut_pell_2 = 0.88 
-local fut_pell_3 = 0.12 
+local fut_pell_2 = 0.88
+local fut_pell_3 = 0.12
 
 get_mother_age `year_policy', yob(`=`year_policy'-18')
 local parent_age = r(mother_age)
@@ -204,8 +200,8 @@ if "`proj_type'" == "growth forecast" {
 	*Policy is on margin of some - > zero pell; 1/3 students receive Pell (Bettinger, 2004)
 	*Hence p30 is too low as obviously richer people select into being students, approximate
 	*with p40
-	local parent_rank = 40 
-	
+	local parent_rank = 40
+
 	est_life_impact `pct_earn_impact_neg', ///
 		impact_age(`impact_age') project_age(`proj_start_age') end_project_age(`proj_short_end') ///
 		project_year(`project_year') usd_year(`usd_year') ///
@@ -229,10 +225,10 @@ if "`proj_type'" == "growth forecast" {
 		program_age(`impact_age') // age we're projecting from
 	  local tax_rate_shortrun = r(tax_rate)
 	}
-		
+
 	local increase_taxes_neg = `tax_rate_shortrun' * `total_earn_impact_neg'
 	local total_earn_impact_aftertax_neg = (1-`tax_rate_shortrun') * `total_earn_impact_neg'
-		
+
 	est_life_impact `pct_earn_impact_pos', ///
 		impact_age(`impact_age_pos') project_age(`proj_start_age_pos') end_project_age(`proj_age') ///
 		project_year(`project_year_pos') usd_year(`usd_year') ///
@@ -267,7 +263,7 @@ if "`proj_type'" == "growth forecast" {
 
 **************************
 /* 5. Cost Calculations */
-**************************	
+**************************
 *Uninduced (assume 4 year)
 local uninduced_cost = 0
 
@@ -320,31 +316,62 @@ local program_cost_unscaled = `induced_cost' + `uninduced_cost'
 if "${got_tn_costs}"!="yes" {
 	cost_of_college, year(`year_policy') state(TN) type_of_uni(community)
 	global tn_cc_cost_of_college = r(cost_of_college)
-	global tn_cc_tuition = r(tuition)
-	
+
 	cost_of_college, year(`year_policy') state(TN) type_of_uni("rmb")
 	global tn_rmb_cost_of_college = r(cost_of_college)
-	global tn_rmb_tuition = r(tuition)
-	
+
+	cost_of_college, year(`year_policy') state(TN)
+	global tn_cost_of_college = r(cost_of_college)
+	global tn_sticker_tuition_in = r(in_state)
+	global tn_sticker_tuition_out = r(out_state)
+
 	global got_tn_costs yes
 }
 local enroll_cost = `years_effect_4yr_disc' * (${tn_rmb_cost_of_college} - `efc_discontinuity_level') + ///
 				`years_effect_2yr_disc' * (${tn_cc_cost_of_college} - `efc_discontinuity_level') - ///
 				`induced_cost' // net out Pell cost to avoid double counting
 
-
-
 /*
 Note: We determine cost changes based on the in-state and out of state tuition costs.
 */
-local avg_cost_effect = (`out_state_tuit_fees_effect'*`p_out_state' + ///
-				`in_state_tuit_fees_effect'*`p_in_state') / ///
-				(`p_in_state'+`p_out_state')
-				
+local p_in_state = `p_2yr_tn' + `p_4yr_tn'
+local p_out_state = `p_2yr_not_tn' + `p_4yr_not_tn'
+
+local avg_cost_effect_tuit_fees_out = (`out_state_tuit_fees_effect' * ///
+							               `p_out_state') / ///
+									  (`p_in_state'+`p_out_state')
+
+local avg_cost_effect_tuit_fees_in = (`in_state_tuit_fees_effect' * ///
+									      `p_in_state') / ///
+									 (`p_in_state'+`p_out_state')
+
+local enroll_effect_tn = `enroll_effect_4yr_pub_tn' + ///
+						 `enroll_effect_2yr_pub_tn'
+local enroll_effect_not_tn = `enroll_effect_4yr_pub' + ///
+							 `enroll_effect_2yr_pub'
+
+local treatment_enrolled_in_state  = `p_in_state' + ///
+									 `enroll_effect_tn'
+local treatment_enrolled_out_state = `p_out_state' + ///
+									 `enroll_effect_not_tn'
+
+local avg_cost_effect_in = `treatment_enrolled_in_state' * ///
+						   `avg_cost_effect_tuit_fees_in' * ///
+						   ($tn_cost_of_college / ///
+							   $tn_sticker_tuition_in)
+
+local avg_cost_effect_out = `treatment_enrolled_out_state' * ///
+							`avg_cost_effect_tuit_fees_out' * ///
+						    ($tn_cost_of_college / ///
+							    $tn_sticker_tuition_out)
+
+local avg_cost_effect = `avg_cost_effect_in' + `avg_cost_effect_out'
+
 local switch_cost_gov  = `avg_cost_effect'-`net_price_effect'
 local switch_cost_priv = `net_price_effect'
 
-local total_cost = `program_cost_unscaled' + `enroll_cost' + `switch_cost_gov' - `increase_taxes' 
+local total_cost = `program_cost_unscaled' + `enroll_cost' + ///
+				   `switch_cost_gov' - `increase_taxes'
 
 *************************
 /* 6. WTP Calculations */
@@ -355,17 +382,17 @@ if "`wtp_valuation'" == "post tax" {
 	local wtp_induced = `total_earn_impact_aftertax'  - ///
 							`years_effect_4yr_disc' * `efc_discontinuity_level' - ///
 							`years_effect_2yr_disc' * `efc_discontinuity_level' ///
-	
+
 	*Uninduced value at transfer
 	local wtp_not_induced = `uninduced_cost'
-	
+
 	local WTP = `wtp_induced' + `wtp_not_induced'
 }
 
 if "`wtp_valuation'" == "cost" {
 	*Induced value at fraction of transfer: `val_given_marginal'
 	local wtp_induced = `val_given_marginal'*`induced_cost'
-	
+
 	*Uninduced value at transfer
 	local wtp_not_induced =  `uninduced_cost'
 
@@ -379,19 +406,19 @@ if "`wtp_valuation'" == "cost" {
 local MVPF = `WTP' / `total_cost'
 
 /*
-Figures for Attainment Graph 
+Figures for Attainment Graph
 */
 di `years_effect_tot' //enrollment gain
 di `p_attend_college' //baseline enrollment
-di `uninduced_cost' // Mechanical Cost 
+di `uninduced_cost' // Mechanical Cost
 di `induced_cost' // Behavioral Cost Program
 di 	`enroll_cost' // Behavioral Cost Crowd-In
 di `wtp_induced' //WTP induced
 di `wtp_not_induced' //WTP Non-Induced
 di 	`counterfactual_income_longrun' // Income Counter-Factual
 
-*Locals for Appendix Write-Up 
-di `years_effect_tot' 
+*Locals for Appendix Write-Up
+di `years_effect_tot'
 di `years_effect_4yr_disc'
 di `years_effect_2yr_disc'
 di `tax_rate_longrun'

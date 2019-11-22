@@ -60,32 +60,33 @@ if "`outcome_type'" == "enrollment" {
 	effect in Zimmerman (2014) by the control mean earnings. The se is then estimated
 	by assuming control earnings are known, so the % effect shares a t-stat with the
 	observed earnings effect.*/
-	local enrollment_earn_effect_pos = 1593/7241 // 0.22 - Zimmerman 2014 table 5
-	local enrollment_earn_effect_pos_se = abs(`enrollment_earn_effect_pos'/(1593/604))  // Zimmerman 2014 table 5
-	
-	local enrollment_earn_effect_neg = -12294/94368 //Zimmerman 2014 table 7B
-	local enrollment_earn_effect_neg_se = abs(`enrollment_earn_effect_neg'/(12294/7380)) //Zimmerman 2014 table 7B
-	
-	if "${draw_number}" != "" & "${draw_number}" !="0" {
-		if "${bootstrap_enrollment_effects}"== "yes" {
-			matrix temp=college_effects["${draw_number}", "enrollment_earn_effect_pos"]
-			local enrollment_earn_effect_pos_draw = temp[1,1] //the line above doesn't return a scalar
-			matrix temp=college_effects["${draw_number}", "enrollment_earn_effect_neg"]
-			local enrollment_earn_effect_neg_draw = temp[1,1]
-			local enrollment_earn_effect_pos = `enrollment_earn_effect_pos' + ///
-				`enrollment_earn_effect_pos_se' * invnormal(`enrollment_earn_effect_pos_draw') // draws are from uniforms
-			local enrollment_earn_effect_neg = `enrollment_earn_effect_neg' + ///
-				`enrollment_earn_effect_neg_se' * invnormal(`enrollment_earn_effect_neg_draw') // draws are from uniforms
+	local earnings_level_8_14_quarterly = 7241 // Zimmerman Table 5
+	local total_earn_1_7 = 94368 // Zimmerman Table 7B
+
+	local enrollment_earn_effect_pos = 1593 / `earnings_level_8_14_quarterly' // 0.22 - Zimmerman 2014 table 5
+	local enrollment_earn_effect_neg = -12294 / `total_earn_1_7' // Zimmerman 2014 table 7B
+
+	if "${draw_number}" != "" & "${draw_number}" != "0" {
+		if "${bootstrap_enrollment_effects}" == "yes" {
+			preserve
+				use "${input_data}/causal_estimates/uncorrected/draws/FIU.dta", replace
+				local enrollment_earn_effect_pos = earnings_8_14_change[${draw_number}] ///
+					/ `earnings_level_8_14_quarterly'
+				local enrollment_earn_effect_neg = earning_reduction_1_7[${draw_number}] ///
+					/ `total_earn_1_7'
+			restore
 		}
 	}
 
-	local prog_earn_effect_pos = `enrollment_earn_effect_pos'*`impact_magnitude'
-	local prog_earn_effect_neg = `enrollment_earn_effect_neg'*`impact_magnitude'
+	local prog_earn_effect_pos = `enrollment_earn_effect_pos' * ///
+								 `impact_magnitude'
+	local prog_earn_effect_neg = `enrollment_earn_effect_neg' * ///
+								 `impact_magnitude'
 
 	*Additional Government + Private Expenditure on School
-	local private_expenditure = 2979  * `deflator' //Zimmerman 2014, Table 7a, Expenditure by individuals due to college enrollment
-	local total_expenditure = 5713  * `deflator'  //Zimmerman 2014, Table 7a, Total due to college enrollment
-	
+	local private_expenditure = 2979  * `deflator' // Zimmerman 2014, Table 7a, Expenditure by individuals due to college enrollment
+	local total_expenditure = 5713  * `deflator'  // Zimmerman 2014, Table 7a, Total due to college enrollment
+
 	local private_expenditure_sum = `impact_magnitude' * `private_expenditure'
 	local total_expenditure_sum = `impact_magnitude' * `total_expenditure'
 
@@ -106,34 +107,36 @@ if "`outcome_type'" == "attainment" {
 	effect in Zimmerman (2014) by the control mean earnings. The se is then estimated
 	by assuming control earnings are known, so the % effect shares a t-stat with the
 	observed earnings effect.*/
-	local attainment_earn_effect_pos = 815/7241 //Zimmerman 2014
-	local attainment_earn_effect_pos_se = abs(`attainment_earn_effect_pos'/(815/276)) //Zimmerman 2014
-	
-	/* For the negative effect the % effect is estimated by estimating the % effect
-	associated with enrollment, as above, then normalising by the ratio of the first
-	stages for enrollment and years of education attained. The se is then estimated
-	by assuming first stage ratio is known, so the % effect shares a t-stat with the
-	observed earnings effect.*/
-	local attainment_earn_effect_neg = (-12294/94368) / /// earnings fall due to admission in table 7B
-										(0.457/0.234) // ratio of years to admittance effect in table 4
-	local attainment_earn_effect_neg_se = abs(`attainment_earn_effect_neg' / ///
-										(12294/7380)) // t-stat on admittance earnings effect in table 7B
+	local total_earn_1_7 = 94368 // Zimmerman Table 7B
 
-	if "${draw_number}" != "" & "${draw_number}" !="0" {
-		if "${bootstrap_enrollment_effects}"== "yes" {
-			/*Use draws for enrollment effect as both enrollment and attainment effects 
-			are estimated from zimmerman on same sample, so we want them correlated*/
-			matrix temp= college_effects["${draw_number}", "enrollment_earn_effect_pos"]
-			local attainment_earn_effect_pos_draw = temp[1,1] //the line above doesn't return a scalar
+	local attainment_earn_effect_pos = 815 / 7241 // Zimmerman 2014
+	local attainment_earn_effect_pos_se = abs( ///
+		`attainment_earn_effect_pos' / (815 / 276)) // Zimmerman 2014
+
+	local attainment_earn_effect_neg = (-12294 / `total_earn_1_7') / ///
+									   (0.457 / 0.234) // ratio of years to admittance effect in table 4
+
+	if "${draw_number}" != "" & "${draw_number}" != "0" {
+		if "${bootstrap_enrollment_effects}" == "yes" {
+			/*Use draws for enrollment effect as both enrollment and attainment effects
+			are estimated from zimmerman on same sample, so we want them correlated */
 			matrix temp = college_effects["${draw_number}", "enrollment_earn_effect_pos"]
-			local attainment_earn_effect_neg_draw = temp[1,1]
-			local attainment_earn_effect_pos = `attainment_earn_effect_pos' + `attainment_earn_effect_pos_se' * invnormal(`attainment_earn_effect_pos_draw')
-			local attainment_earn_effect_neg = `attainment_earn_effect_neg' + `attainment_earn_effect_neg_se' * invnormal(`attainment_earn_effect_neg_draw')
+			local attainment_earn_effect_pos_draw = temp[1,1] //the line above doesn't return a scalar
+			/* Positive effect need not be correlated with FIU draws because
+			   we don't use it in that program. */
+			local attainment_earn_effect_pos = `attainment_earn_effect_pos' + ///
+				`attainment_earn_effect_pos_se' * ///
+				invnormal(`attainment_earn_effect_pos_draw')
+			preserve
+				use "${input_data}/causal_estimates/uncorrected/draws/FIU.dta", replace
+				local attainment_earn_effect_neg = earning_reduction_1_7[${draw_number}] ///
+					/ `total_earn_1_7' / (0.457 / 0.234)
+			restore
 		}
 	}
 
-	local prog_earn_effect_pos = `attainment_earn_effect_pos'*`impact_magnitude'
-	local prog_earn_effect_neg = `attainment_earn_effect_neg'*`impact_magnitude'
+	local prog_earn_effect_pos = `attainment_earn_effect_pos' * `impact_magnitude'
+	local prog_earn_effect_neg = `attainment_earn_effect_neg' * `impact_magnitude'
 
 	*Additional Government + Private Expenditure on School
 	local private_expenditure_term = 1166 * `deflator'
@@ -164,12 +167,12 @@ if "`outcome_type'" == "ccattain" {
 										(1337/731)) // Mountjoy (2018) table 5, page 41
 	//This result comes from the earnings effect in Table 5, divided by the total earnings level on page 41
 	//We assume the years of schooling effect is fixed, and scale the point estimate and standard error based
-	//on that figure. We use the estimate of going to two-year school instead of no   
+	//on that figure. We use the estimate of going to two-year school instead of no
 
 	local community_earn_effect_neg = 0
 	local community_earn_effect_neg_se = 0
 	//This result comes from a rough visual inspection of Figure 8 in Mountjoy 2018. The earnings pooled
-	//earnings effects are not reported, but the earnings decline in years 22-24 appears matched by the 
+	//earnings effects are not reported, but the earnings decline in years 22-24 appears matched by the
 	//gains in 25-27. We assume as a result that there are no net earnings changes before age 27
 
 	if "${draw_number}" != "" & "${draw_number}" !="0" {
@@ -182,7 +185,7 @@ if "`outcome_type'" == "ccattain" {
 		local community_earn_effect_neg = `community_earn_effect_neg' + `community_earn_effect_neg_se' * invnormal(`community_earn_effect_neg_draw')
 		}
 	}
-	
+
 	local prog_earn_effect_pos = `community_earn_effect_pos'*`impact_magnitude'
 	local prog_earn_effect_neg = `community_earn_effect_neg'*`impact_magnitude'
 

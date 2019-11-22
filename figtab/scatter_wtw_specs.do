@@ -41,10 +41,15 @@ foreach cat in educ earnsupp jobsearch mixed timelim workexp {
 sort wtp_valuation wtw_cat
 
 g prog = _n
+
 replace prog = . if wtp_valuation != "cost"
 bys program: egen prog_num = mean(prog)
 qui su prog_num
 local last = r(max)
+replace prog_num = prog_num +`last' if wtw_cat == "Earnings Supplements"
+qui su prog_num
+local last = r(max)
+local first = r(min)
 local xline ""
 foreach cat in educ earnsupp jobsearch mixed timelim workexp {
 	qui su prog_num if wtw_cat == "`name_`cat''"
@@ -71,7 +76,7 @@ local max = r(max)
 tw (scatter mvpf num_stagger if wtp_valuation == "cost", mstyle(${style_Welfare_Reform}) ) ///
 	(scatter mvpf num_stagger if wtp_valuation == "post tax", msymbol(triangle) mstyle(${style_Welfare_Reform})) ///
 	(scatter mvpf num_stagger if wtp_valuation == "transfer change",msymbol(X) msize(large) mstyle(${style_Welfare_Reform}) ) ///
-	, xlabel(1(1)`max', valuelabel angle(45) labsize(vsmall)) ///
+	, xlabel(`first'(1)`max', valuelabel angle(45) labsize(vsmall)) ///
 	xtitle("") ytitle("MVPF") $ylabel legend(label(1 "Cost" ) ///
 	label(2 "Post Tax Income") label(3 "Net Transfers") ring(0) col(1) ) ///
 	legend(off) $title xline(`xline', lc(gs9) lp(dash))
@@ -82,7 +87,7 @@ tw (scatter mvpf num_stagger if wtp_valuation == "cost", mstyle(${style_Welfare_
 tw (scatter mvpf num_stagger if wtp_valuation == "cost", mstyle(${style_Welfare_Reform}) ) ///
 	(scatter mvpf num_stagger if wtp_valuation == "post tax", msymbol(triangle) mstyle(${style_Welfare_Reform})) ///
 	(scatter mvpf num_stagger if wtp_valuation == "transfer change",msymbol(X) msize(large) mstyle(${style_Welfare_Reform}) ) ///
-	, xlabel(1(1)`max', valuelabel angle(45) labsize(vsmall)) ///
+	, xlabel(`first'(1)`max', valuelabel angle(45) labsize(vsmall)) ///
 	xtitle("") ytitle("MVPF") $ylabel legend(label(1 "Cost" ) ///
 	label(2 "Post Tax Income") label(3 "Net Transfers") ring(0) col(1) ) ///
 	$title xline(`xline', lc(gs9) lp(dash))

@@ -1,5 +1,5 @@
 ***************************************
-/* 0. Program: Medicaid Intro */
+/* 0. Program: Medicaid GB AER Total */
 ***************************************
 
 /*Goodman-Bacon, Andrew. 

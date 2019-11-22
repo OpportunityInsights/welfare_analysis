@@ -2,7 +2,7 @@
 * 	Graph costs by age for all possible programs
 ********************************************************************************
 
-local modes baseline robustness observed_forecast restricted lower_bound_wtp fixed_forecast  
+local modes baseline robustness observed_forecast restricted lower_bound_wtp fixed_forecast
 /* Options:
 	-	baseline
 	-	lower_bound_wtp
@@ -202,9 +202,10 @@ if "${version}" == "slides" {
 		* call out MTO
 	tw (scatter mvpf stagger_age if program != "mto_all", ${pe_scatter} mcolor(gs11) ) ///
 		(scatter mvpf stagger_age if program == "mto_all", ${pe_scatter} ${pe_scatter_lab} mlabsize(vsmall) mlabcolor(gs11) mstyle(${style_MTO})) ///
+		(rcap l_mvpf_ef u_mvpf_ef stagger_age if program == "mto_all", lstyle(${style_MTO}) ${pe_rcap} lwidth(0.05)) ///
 		,legend(off) $options
 
-	graph export "${output}/scatter_mvpf_by_age_all_pes_callout_MTO`save_mod'.${img}", replace
+	graph export "${output}/scatter_mvpf_by_age_all_pes_callout_MTO_with_CI_`save_mod'.${img}", replace
 
 
 }
@@ -246,7 +247,7 @@ if "$version" == "slides" { // add legend manually to avoid jiggle in the slides
 		, legend( off) ///
 		$options
 }
-else { 
+else {
 		tw `graph_commands_slides' ///
 		, legend( order(`leg_order') size(vsmall) ring(0) pos(2) cols(1) region(fcolor(gs11%0) lcolor(gs11%0))) ///
 		$options
@@ -422,6 +423,7 @@ preserve
 		local ++i
 		local ++j
 		gen `no_spaces' = mvpf if (prog_type == "`type'")
+		replace stagger_age = . if program == "snap_intro" | program == "mto_all"
 		label var `no_spaces' "`type'"
 		local graph_commands = "`graph_commands'" + ///
 			" (scatter `no_spaces' stagger_age , ${pe_scatter} mstyle(${style_`no_spaces'}) mfcolor(%65) mlwidth(0) msize(0.8)) "
@@ -459,9 +461,13 @@ preserve
 			graph export "${output}/scatter_mvpf_by_age_`no_spaces'_dollar_avgs_w_cis`save_mod'.${img}", replace
 		}
 	}
+	gen snap_index = 1 if program == "snap_intro"
+	gen mto_index = 1 if program == "mto_all"
+	local graph_commands = "`graph_commands'" + ///
+		" (scatter mvpf age_benef if snap_index == 1, msymbol(Oh)  msize(1.6) mlabel(prog_type) mlabsize(small) ${pos_Nutrition} msize(1.6) mstyle(${style_Nutrition}) mlabstyle(${style_Nutrition})) " + ///
+		" (scatter mvpf age_benef if mto_index == 1, msymbol(Oh)  msize(1.6) mlabel(prog_type) mlabsize(small) mlabpos(1) msize(1.6) mstyle(${style_MTO}) mlabstyle(${style_MTO})) "
 
 	local leg_order = "`leg_order'" + "`i' "
-
 
 	tw `graph_commands' ///
 		, legend(off) ///

@@ -175,6 +175,18 @@ replace effect_pos_wage=effect_obs_wage if age ==32
 
 keep if age<=65
 
+* clean and export data for website
+preserve
+		keep age cost l_cost u_cost wag_adj cfactual_wage ///
+		effect_obs_wage effect_pos_wage
+		ren *cost* *net_cost*
+		ren (wag_adj cfactual_wage effect_obs_wage effect_pos_wage) ///
+		(mean_acs_wage control_mean_wage treatment_wage_obs treatment_wage_proj)
+	export delimited "${welfare_files}/Website/website_acs_forecasts_fiu.csv", replace nolabel
+
+restore
+
+
 
 * 0. Costs on their own
 tw 	(line cost age if age<=proj_start_age & cost >=0 , yaxis(2) ls(p1) lc(maroon%20) ) ///

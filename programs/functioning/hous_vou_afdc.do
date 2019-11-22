@@ -4,13 +4,13 @@
 
 
 /*
-Wood, M., Turnham, J., & Mills, G. (2008). Housing affordability and family 
-wellbeing: Results from the housing voucher evaluation. Housing Policy Debate, 
+Wood, M., Turnham, J., & Mills, G. (2008). Housing affordability and family
+wellbeing: Results from the housing voucher evaluation. Housing Policy Debate,
 19(2), 367-412.
-Mills, G., Gubits, D., Orr, L., Long, D., Feins, J., Kaul, B., ... & Jones, A. (2006). 
-Effects of housing vouchers on welfare families. 
-Washington, DC: US Department of Housing and Urban Development, Office of Policy 
-Development and Research. 
+Mills, G., Gubits, D., Orr, L., Long, D., Feins, J., Kaul, B., ... & Jones, A. (2006).
+Effects of housing vouchers on welfare families.
+Washington, DC: US Department of Housing and Urban Development, Office of Policy
+Development and Research.
 [abt associates]
 */
 
@@ -70,9 +70,9 @@ if "`bootstrap'" == "yes" {
 	if ${draw_number} ==1 {
 		preserve
 			use "${input_data}/causal_estimates/${folder_name}/draws/${name}.dta", clear
-			qui ds draw_number, not 
+			qui ds draw_number, not
 			global estimates_${name} = r(varlist)
-			
+
 			mkmat ${estimates_${name}}, matrix(draws_${name}) rownames(draw_number)
 		restore
 	}
@@ -103,21 +103,21 @@ local age_kid = 6.0 // Mills et al exhibit 6.1
 local usd_year = 2006 //assume same year as 2006 publication of abt associates report
 local income_year = 2002 //year from median half-year,  Mills et al. exhibit 4.9
 
-local years_vouchers = 4 // program operated 2000-2004 
+local years_vouchers = 4 // program operated 2000-2004
 /*
 The program operated for four years, but the earnings impacts were calculated in
-half years that did not fully line up to the start of and end of that period. In 
-order to avoid an extrapolation without basis in evidence we measure costs based 
+half years that did not fully line up to the start of and end of that period. In
+order to avoid an extrapolation without basis in evidence we measure costs based
 on four years of transfers and measure earnings impacts and transfer changes based
-on the three and a half years observed. 
+on the three and a half years observed.
 */
 
 /*
 "The dollar value of the voucher was high for some families and more modest for others,
 but on average was more than $500 a month." - Wood et al. pg. 400 footnote 33
-We consequently assume that the value is between $500 and $600 at $550. 
+We consequently assume that the value is between $500 and $600 at $550.
 
-We prefer this estimate of the value of the voucher to the nationwide average of 
+We prefer this estimate of the value of the voucher to the nationwide average of
 $456 reported in Mills et al. 2006
 */
 local voucher_cost = 550*12
@@ -128,8 +128,8 @@ local control_mean_earn = 2*(19532/7) //Mills et al. exhibit 4.9
 local num_kids = 2 // Assumed
 
 /*
-"Reeder (1985) estimates the ratio of mean benefit to mean subsidy for housing 
-vouchers to be around 0.83, so that the average equivalent variation of a housing 
+"Reeder (1985) estimates the ratio of mean benefit to mean subsidy for housing
+vouchers to be around 0.83, so that the average equivalent variation of a housing
 voucher for our sample is $6,860 per year." - Jacob & Luidwig pg. 281
 */
 local benefit_ratio = 0.83
@@ -140,7 +140,7 @@ else local ev_coeff = 1
 /* 4. Intermediate Calculations */
 **********************************
 
-*Convert estimates over entire sample period to yearly averages 
+*Convert estimates over entire sample period to yearly averages
 *(7 half years in sample period)
 local food_stamp_tanf_impact = `food_stamp_tanf_impact'/(7/2)
 local earn_year_impact = `earn_impact_total'/(7/2)
@@ -159,7 +159,7 @@ if "`proj_type'" == "growth forecast" {
 	local pct_earn_impact_neg = r(prog_earn_effect_neg)
 	local pct_earn_impact_pos = r(prog_earn_effect_pos)
 
-	*Initial Earnings Decline 
+	*Initial Earnings Decline
 	local proj_start_age = 18
 	local proj_short_end = 24
 	local impact_age = 34
@@ -174,16 +174,16 @@ if "`proj_type'" == "growth forecast" {
 
 	local total_earn_impact_neg = r(tot_earn_impact_d)
 	local cfactual_inc_kid = r(cfactual_income)
-	
+
 	get_tax_rate `cfactual_inc_kid', ///
 		include_transfers(yes) ///
 		include_payroll(`payroll_assumption') /// "yes" or "no"
 		forecast_income(no) /// "yes" or "no"
 		usd_year(`usd_year') /// USD year of income
-		inc_year(2018) /// year of income measurement 
+		inc_year(2018) /// year of income measurement
 		earnings_type(individual) ///
-		program_age(`impact_age') // age of income measurement   
-	
+		program_age(`impact_age') // age of income measurement
+
 	local tax_rate_kid = r(tax_rate)
 	local increase_taxes_neg = `tax_rate_kid' * `total_earn_impact_neg'
 	local total_earn_impact_aftertax_neg = `total_earn_impact_neg' - `increase_taxes_neg'
@@ -204,7 +204,7 @@ if "`proj_type'" == "growth forecast" {
 	local increase_taxes_pos = `tax_rate_kid' * `total_earn_impact_pos'
 	local total_earn_impact_aftertax_pos = `total_earn_impact_pos' - `increase_taxes_pos'
 
-	
+
 	*Combine Estimates
 	local total_earn_impact = `num_kids' * (`total_earn_impact_neg' + `total_earn_impact_pos')
 	local increase_taxes = `num_kids' * (`increase_taxes_neg' + `increase_taxes_pos')
@@ -216,7 +216,7 @@ if "$got_hcv_cost"!="yes" {
 	cost_of_college , year(2005)
 	global hcv_college_cost = r(cost_of_college)
 	global hcv_tuition_cost = r(tuition)
-	
+
 	global got_hcv_cost = "yes"
 }
 
@@ -226,12 +226,12 @@ local govt_college_cost = (${hcv_college_cost} - ${hcv_tuition_cost})*`years_imp
 local priv_college_cost = (${hcv_college_cost})*`years_impact'*r(deflator)*(1/(1+`discount_rate')^(4))
 
 *Estimating effects without kids
-else if "`proj_type'" == "no kids" {
+if "`proj_type'" == "no kids" {
 	local total_earn_impact = 0
 	local increase_taxes = 0
 	local govt_college_cost = 0
-	local priv_college_cost = 0 
-	
+	local priv_college_cost = 0
+
 }
 
 local prior_earnings = `control_mean_earn'
@@ -243,28 +243,28 @@ if "`tax_rate_assumption'" == "cbo"{
 		include_payroll(`payroll_assumption') /// "yes" or "no"
 		forecast_income(no) /// "yes" or "no"
 		usd_year(`usd_year') /// USD year of income
-		inc_year(`income_year') /// year of income measurement 
+		inc_year(`income_year') /// year of income measurement
 		earnings_type(household) ///
-		program_age(`earn_age') /// age of income measurement   
-		kids(`num_kids') // number of kids in family 
+		program_age(`earn_age') /// age of income measurement
+		kids(`num_kids') // number of kids in family
 
 	di `prior_earnings'
 	local tax_rate = r(tax_rate)
 }
 
 
-	
+
 **************************
 /* 5. Cost Calculations */
 **************************
 
-local program_cost = 0
+local program_cost_incl_behav = 0
 local tax_impact = 0
 local earn_impact_par = 0
 local FE = 0
 
 forval i = 1/`years_vouchers' {
-	local program_cost = `program_cost' + `voucher_cost'*(1/(1+`disc_rate')^(`i'-1)) 
+	local program_cost_incl_behav = `program_cost_incl_behav' + `voucher_cost'*(1/(1+`disc_rate')^(`i'-1))
 	local tax_impact = `tax_impact' + (`tax_rate' * `earn_year_impact') * (1/(1+`disc_rate')^(`i'-1))
 	local earn_impact_par = `earn_impact_par' + `earn_year_impact' * (1/(1+`disc_rate')^(`i'-1))
 	local FE = `FE' + ((`tax_rate' * `earn_year_impact' ) - `food_stamp_tanf_impact') * (1/(1+`disc_rate')^(`i'-1))
@@ -273,6 +273,9 @@ forval i = 1/`years_vouchers' {
 *Add one time college cost
 local FE = `FE' - `govt_college_cost'
 di `tax_impact'
+
+local program_cost = `ev_coeff' * (`program_cost_incl_behav' + ///
+					 ((`earn_impact_par' + `tanf_impact') * 0.3))
 
 local total_cost = `program_cost' - `FE'
 
@@ -284,12 +287,12 @@ local total_cost = `total_cost' - `increase_taxes'
 *************************
 local WTP_kid = 0
 if "`wtp_valuation'" == "cost" {
-	local WTP = `ev_coeff'*(`program_cost' + ((`earn_impact_par' + `tanf_impact')*0.3))
+	local WTP = `program_cost'
 	/*
 	Program costs are average costs with behavioral responses included. We determine WTP
 	based on the mechanical cost. The mechanical cost is the program cost net of 30%
-	of the change in adjusted monthly income. Adjusted for monthly income moves by the 
-	decline in earnings net of the TANF increase. 
+	of the change in adjusted monthly income. Adjusted for monthly income moves by the
+	decline in earnings net of the TANF increase.
 	*/
 	if "`proj_type'" != "no kids"  {
 		local WTP = `WTP' + (1-`tax_rate_kid')*`total_earn_impact' - `priv_college_cost'
@@ -302,19 +305,19 @@ if "`wtp_valuation'" == "cost" {
 }
 
 if "`wtp_valuation'" == "post tax" {
-	local WTP = `ev_coeff'*`program_cost' + (1-`tax_rate')*`earn_impact_par' - `ev_coeff'*((`earn_impact_par' - `tanf_impact')*0.3)
-		
+	local WTP = `ev_coeff'*`program_cost_incl_behav' + (1-`tax_rate')*`earn_impact_par'
+
 	if "`proj_type'" != "no kids"  {
 		local WTP = `WTP' + (1-`tax_rate_kid')*`total_earn_impact' - `priv_college_cost'
 		local WTP_kid = (1-`tax_rate_kid')*`total_earn_impact' - `priv_college_cost'
 
 		}
-	
+
 	if "`value_transfer'" == "yes"  {
 	local WTP = `WTP' + `food_stamp_tanf_impact'
 	}
 
-} 
+}
 
 **************************
 /* 7. MVPF Calculations */
@@ -352,7 +355,7 @@ if `WTP_kid'>`=0.5*`WTP'' {
 	}
 else {
 	global age_benef_`1' = `age_stat'
-}	
+}
 
 * income globals
 deflate_to 2015, from(`usd_year')
@@ -373,5 +376,3 @@ else if `WTP_kid'>`=0.5*`WTP'' {
 	global inc_year_benef_`1' = `project_year'+34-`project_age'
 	global inc_age_benef_`1' = 34 // child income is predicted from parent income
 }
-
-

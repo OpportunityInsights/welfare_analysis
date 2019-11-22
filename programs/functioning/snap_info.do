@@ -1,5 +1,5 @@
 *****************************************
-/* 0. Program: SNAP to elderly: Just Info*/
+/* 0. Program: SNAP FinkNoto: Just Info*/
 *****************************************
 
 *Finkelstein, Amy and Notowidigdo, Matthew J. 2018. "Take-up and Targeting: Experimental 

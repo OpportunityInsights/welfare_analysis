@@ -1,6 +1,6 @@
-*******************************************
-/* 0. Program: Medicaid State Expansions */
-*******************************************
+********************************
+/* 0. Program: Medicaid BKL 2018 */
+********************************
 
 /* 
 Brown, David W., Amanda E. Kowalski, and Ithai Z. Lurie. 
@@ -33,6 +33,49 @@ local transfer_assumption = "$transfer_assumption" // "yes" or "no"
 *********************************
 /* 2. Causal Inputs from Paper */
 *********************************
+/*
+local medi_spend_0_18 = 0.593	// Impact on total medicaid spending 0-18 undiscounted; 
+								   0-18 BKL (2018) table 1
+local tax_rev_19_28 = 0.533		// Undiscounted sum 19-28 (cumulative effect to 28) 
+								   from BKL 2018 table OA.7, column 10
+local wage_inc_19_28 = 1.177	// Undiscounted sum 19-28 (cumulative effect to 28) 
+								   from BKL 2018 table OA.5, column 10
+local mort_19_28 = -0.02		// Cumulative effect 19-28 from BKL 2018 table OA.4, column 10
+local tax_rev_19 = 0.012		// BKL 2018 table OA.7
+local tax_rev_20 = 0.016		// BKL 2018 table OA.7
+local tax_rev_21 = 0.016		// BKL 2018 table OA.7
+local tax_rev_22 = 0.026		// BKL 2018 table OA.7
+local tax_rev_23 = 0.048		// BKL 2018 table OA.7
+local tax_rev_24 = 0.07			// BKL 2018 table OA.7
+local tax_rev_25 = 0.092		// BKL 2018 table OA.7
+local tax_rev_26 = 0.094		// BKL 2018 table OA.7
+local tax_rev_27 = 0.071		// BKL 2018 table OA.7
+local tax_rev_28 = 0.088		// BKL 2018 table OA.7
+local wage_inc_19 = 0.061		// BKL 2018 table OA.5
+local wage_inc_20 = 0.035		// BKL 2018 table OA.5
+local wage_inc_21 = -0.055		// BKL 2018 table OA.5
+local wage_inc_22 = 0.015		// BKL 2018 table OA.5
+local wage_inc_23 = 0.14		// BKL 2018 table OA.5
+local wage_inc_24 = 0.217		// BKL 2018 table OA.5
+local wage_inc_25 = 0.228		// BKL 2018 table OA.5
+local wage_inc_26 = 0.136		// BKL 2018 table OA.5
+local wage_inc_27 = 0.121		// BKL 2018 table OA.5
+local wage_inc_28 = 0.28		// BKL 2018 table OA.5
+local payroll_19 = 0.003		// BKL 2018 table OA.9
+local payroll_20 = 0			// BKL 2018 table OA.9
+local payroll_21 = -0.003		// BKL 2018 table OA.9
+local payroll_22 = 0			// BKL 2018 table OA.9
+local payroll_23 = 0.008		// BKL 2018 table OA.9
+local payroll_24 = 0.015		// BKL 2018 table OA.9
+local payroll_25 = 0.016		// BKL 2018 table OA.9
+local payroll_26 = 0.013		// BKL 2018 table OA.9
+local payroll_27 = -0.006		// BKL 2018 table OA.9
+local payroll_28 = -0.006		// BKL 2018 table OA.9
+local hosp_inc = 0.04			// Boudreaux et al. (2016) table 5 - Comes from 4% increase 
+								   in hospital visits on medicaid introduction.
+local ever_coll_19_28 = 0.486	// BKL 2018 table OA.2
+*/
+
 
 /* Import estimates from paper, giving option for corrected estimates.
 When bootstrap!=yes import point estimates for causal estimates.

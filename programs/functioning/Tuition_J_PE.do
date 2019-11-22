@@ -8,7 +8,7 @@ Implications for structuring tax-based aid." Economics of Education Review 51 (2
 National Tax Journal 65, no. 1 (2012): 59-90. */
 
 *Evaluate the impact of claiming tuition tax deduction on college attendance, student
-*status, college type, tuition paid, and student loans. 
+*status, college type, tuition paid, and student loans.
 
 
 ********************************
@@ -45,17 +45,17 @@ if "`tax_rate_assumption'" ==  "continuous" {
 /* 2. Inputs from Paper */
 *********************************
 /*
-local impact_attendance = 0.000 //Bulman and Hoxby 2016, Table 5
-local impact_attendance_se = 0.008 //Bulman and Hoxby 2016, Table 5
+local impact_attendance = 0.000 //Hoxby and Bulman 2016, Table 5
+local impact_attendance_se = 0.008 //Hoxby and Bulman 2016, Table 5
 
-local deduction_claim = 1199 //Bulman and Hoxby 2016, Table 3
-local deduction_claim_se = 15 //Bulman and Hoxby 2016, Table 3
+local deduction_claim = 1199 //Hoxby and Bulman 2016, Table 3
+local deduction_claim_se = 15 //Hoxby and Bulman 2016, Table 3
 
-local core_edu_cost = 177 //Bulman and Hoxby 2016, Table 8
-local core_edu_cost_se = 256 //Bulman and Hoxby 2016, Table 8
+local core_edu_cost = 177 //Hoxby and Bulman 2016, Table 8
+local core_edu_cost_se = 256 //Hoxby and Bulman 2016, Table 8
 
-local net_tuition_paid = 79 //Bulman and Hoxby 2016, Table 8
-local net_tuition_paid_se = 221 //Bulman and Hoxby 2016, Table 8
+local net_tuition_paid = 79 //Hoxby and Bulman 2016, Table 8
+local net_tuition_paid_se = 221 //Hoxby and Bulman 2016, Table 8
 
 
 */
@@ -64,7 +64,7 @@ local net_tuition_paid_se = 221 //Bulman and Hoxby 2016, Table 8
 /* Import estimates from paper, giving option for corrected estimates.
 When bootstrap!=yes import point estimates for causal estimates.
 When bootstrap==yes import a particular draw for the causal estimates.
-${folder_name}, being set externally, may vary in order to use pub bias corrected estimates. */	
+${folder_name}, being set externally, may vary in order to use pub bias corrected estimates. */
 if "`1'" != "" global name = "`1'"
 local bootstrap = "`2'"
 if "`3'" != "" global folder_name = "`3'"
@@ -98,12 +98,12 @@ if "`bootstrap'" != "yes" {
 /* 3. Assumptions from the Paper */
 ****************************************************
 
-local parental_earnings = 160000 //Bulman and Hoxby 2016, Table 1
-local mtr = 0.28 //Bulman and Hoxby 2016, pg 33
+local parental_earnings = 160000 //Hoxby and Bulman 2016, Table 1
+local mtr = 0.28 //Hoxby and Bulman 2016, pg 33
 
-local ed_resources = (19732+20168)/2 //Bulman and Hoxby 2016, Table 1
-local tuition = (16461+17067)/2  //Bulman and Hoxby 2016, Table 1
-local usd_costs = 2004  //Bulman and Hoxby 2016, Table 1
+local ed_resources = (19732+20168)/2 //Hoxby and Bulman 2016, Table 1
+local tuition = (16461+17067)/2  //Hoxby and Bulman 2016, Table 1
+local usd_costs = 2004  //Hoxby and Bulman 2016, Table 1
 
 local usd_year = 2006
 
@@ -156,7 +156,7 @@ if "`proj_type'" == "growth forecast" {
 	  get_tax_rate `counterfactual_income_shortrun', ///
 		include_transfers(yes) ///
 		include_payroll(`payroll_assumption') /// "yes" or "no"
-		forecast_income(no) /// don't forecast short-run earnings, this would give an artificially high MTR 
+		forecast_income(no) /// don't forecast short-run earnings, this would give an artificially high MTR
 		usd_year(`usd_year') /// USD year of income
 		inc_year(`impact_year') /// year of income measurement
 		earnings_type(individual) /// individual earnings
@@ -360,4 +360,3 @@ else {
 
 
 di `impact_year_pos'
-
