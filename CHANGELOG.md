@@ -20,7 +20,7 @@
 - `kalamazoo.do`: Fixed an issue that prevented the `college_cost` assumption to be loaded properly.
 - `pell_tn.do`: We fixed a miscalculation in the fraction of enrollees switching from community colleges.
 - `ss_benefit.do`: We now correctly incorporate the private cost of college. To do so, we now set the parameter `private_costs_gov` to 'yes'. Before, code reliant on this assumption was skipped in the calculation.
-- `tuition_s_pe.do`: We fixed an issue that prevented the `omit_edu_cost` assumption to be loaded properly.
+- `tuition_s_pe.do`: We fixed an issue that prevented the `omit_edu_cost` assumption to be loaded properly. This does not affect our baseline estimates as the assumption was loaded from another `tuition_*` program when running the bootstrap wrapper.
 - `TN_Hope.do`: Fixed a minor double counting issue in enrollment.
 - `WIC.do`: Fixed an issue in the conservative WTP measurements in which a code block did not run. This does not affect the MVPF but affects the size of the program cost.
 - `wrapper/bootstrap_wrapper.do` and `wrapper/compile_results.do`: Fixed an issue where the Efron correction used the number of draws rather than the number of draws where the MVPF is non-missing.
