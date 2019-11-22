@@ -6,12 +6,12 @@ set matsize 2000
 * Set file paths
 global welfare_git "${github}/Welfare"
 global welfare_dropbox "${welfare_files}"
-global assumptions "${welfare_dropbox}/MVPF_Calculations/program_assumptions"
+global assumptions "${welfare_files}/MVPF_Calculations/program_assumptions"
 global program_folder "${welfare_git}/programs/functioning"
 global ado_files "${welfare_git}/ado"
-global data_derived "${welfare_dropbox}/Data/derived"
-global output "${welfare_dropbox}/Data/derived"
-global input_data "${welfare_dropbox}/data/inputs"
+global data_derived "${welfare_files}/Data/derived"
+global output "${welfare_files}/Data/derived"
+global input_data "${welfare_files}/data/inputs"
 
 *Set options
 local debug = 0 // 1 noisily displays running .do files
@@ -259,7 +259,7 @@ local replications $replications
 if regexm("`mode'","corrected") {
 	local pub_bias_mode = subinstr("`mode'","corrected_mode_","",1)
 	local use_estimates "corrected/MLE/mode_`pub_bias_mode'"
-	global output_corrected "${welfare_dropbox}/data/derived/`use_estimates'"
+	global output_corrected "${welfare_files}/data/derived/`use_estimates'"
 	cap mkdir "$output_corrected"
 }
 else local use_estimates uncorrected

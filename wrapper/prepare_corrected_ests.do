@@ -145,7 +145,7 @@ di `count_0_restricted'
 
 
 * run the matlab script
-cd "${welfare_git}/pub_bias/code_and_data_2019/Matlab"
+cd "${welfare_git}/pub_bias"
 shell matlab -nodisplay -nosplash -nodesktop -r "selection_welfare('${welfare_git}','${welfare_dropbox}');exit;"
 
 * make sure the script has time to run

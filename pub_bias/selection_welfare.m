@@ -5,7 +5,7 @@ rng(1);
 application=0;
 
 %add code and input file paths
-addpath(strcat(gitpath,'/pub_bias/code_and_data_2019/Matlab'));
+addpath(strcat(gitpath,'/pub_bias'));
 cd(strcat(filepath,'/data/inputs/causal_estimates/uncorrected'));
 
 %loading the data
