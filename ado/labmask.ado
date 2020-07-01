@@ -1,5 +1,8 @@
 *! NJC 1.0.0 20 August 2002
 * values of -values-, or its value labels, to be labels of -varname-
+
+cap program drop labmask
+
 program def labmask, sortpreserve 
 	version 7 
 	syntax varname(numeric) [if] [in], /* 
