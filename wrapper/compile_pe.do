@@ -3,7 +3,6 @@
 ********************************************************************************
 
 * Set file paths
-global welfare_git "${github}/Welfare"
 global welfare_dropbox "${welfare_files}"
 global assumptions "${welfare_dropbox}/MVPF_Calculations/program_assumptions"
 global program_folder "${welfare_git}/programs/functioning"
@@ -14,7 +13,7 @@ global output "${welfare_dropbox}/figtab/scratch"
 cap mkdir "$output"
 
 *Set compile types
-local compile_types corrected_mode_4 corrected_mode_1 
+local compile_types corrected_mode_4 corrected_mode_1
 
 *Set compile types if running externally
 if "`1'"=="all_modes" local compile_types robustness_pe corrected_mode_1 corrected_mode_4
@@ -114,7 +113,7 @@ foreach compile_type in `compile_types' {
 		merge m:1 program using "${data_derived}/all_programs_`sample's_corr_1.dta",  ///
 		keepusing(has_ses p_val_range stagger_age_benef) ///
 		assert(match using) keep(match)  nogen // using should just be abecedarian and job corps
-		
+
 		tab program
 		duplicates report program, gen(specs)
 
@@ -152,7 +151,7 @@ foreach compile_type in `compile_types' {
 						g n_wtp = wtp / program_cost
 						g n_cost = cost / program_cost
 						g count_temp = 1
-						
+
 						collapse (mean) n_wtp n_cost age_benef age_stat (rawsum) count_temp, by(prog_type robust_type)
 
 						gen avg_mvpf = min(n_wtp/n_cost, 5) if ((n_wtp>0 & n_cost >0)|(n_wtp<0 & n_cost <0)) & count_temp >1
@@ -188,7 +187,7 @@ foreach compile_type in `compile_types' {
 			g n_cost = cost / program_cost
 			g count_temp = 1
 			collapse (mean) n_wtp n_cost age_benef age_stat (rawsum) count_temp, by(prog_type)
-			
+
 			local inf 99999
 			gen avg_mvpf = n_wtp/n_cost if ((n_wtp>0 & n_cost>0) |(n_wtp<0 & n_cost<0)) & count_temp >1
 			replace avg_mvpf = n_wtp/n_cost if (n_wtp<=0 & n_cost>0) & count_temp >1
@@ -196,9 +195,9 @@ foreach compile_type in `compile_types' {
 			local inf = max(99999,abs(r(max)),abs(r(min)))
 			replace avg_mvpf = `inf' if (n_wtp > 0 & n_cost <=0)
 			replace avg_mvpf = -`inf' if (n_wtp<0 & n_cost == 0)
-			
+
 			g infinity_prog_type_mvpf = `inf'
-			
+
 			keep prog_type avg_mvpf n_cost n_wtp age_benef age_stat infinity_prog_type_mvpf
 			ren age_stat avg_prog_type_age_stat
 			ren age_benef avg_prog_type_age_benef
@@ -223,11 +222,11 @@ foreach compile_type in `compile_types' {
 			assert tax_rate!="" if robust_type=="tax_rate_cont"
 			assert disc_rate!="" if robust_type=="discount_rate"
 		}
-		
+
 		*save unbounded
 		if "`sample'" == "baseline" save "${data_derived}/all_programs_`compile_type'_corr_1_unbounded_averages.dta", replace
 		else save "${data_derived}/all_programs_`compile_type'_`sample's_corr_1_unbounded_averages.dta", replace
-		
+
 		* bound mvpf
 		foreach var in mvpf avg_prog_type_mvpf {
 			if "`var'" == "mvpf" local inf_var infinity

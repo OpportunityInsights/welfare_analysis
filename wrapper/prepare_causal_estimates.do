@@ -3,7 +3,6 @@
 ********************************************************************************
 set matsize 2000
 * Set file paths
-global welfare_git "${github}/Welfare"
 global welfare_dropbox "${welfare_files}"
 global assumptions "${welfare_files}/MVPF_Calculations/program_assumptions"
 global program_folder "${welfare_git}/programs/functioning"
