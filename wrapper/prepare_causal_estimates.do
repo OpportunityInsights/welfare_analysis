@@ -47,6 +47,8 @@ foreach program in `programs' {
 
 set seed ${welfare_seed}
 
+* Create draws folder if it does not yet exist
+cap mkdir "${causal_draws_uncorrected}"
 *check if draws exist
 cap confirm file "${causal_draws_uncorrected}/`program'.dta"
 if _rc==0 & "${redraw_causal_estimates}"!="yes" {
