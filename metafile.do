@@ -27,11 +27,10 @@ Matlab, in which case the estimation of and correction for publication
 bias is omitted.
 
 ***********************************************************************/
-global github = "C:/Users/nit518/Documents/GitHub/"
-global welfare_git = "${github}/Welfare"
+global github = "C:/Users/hab737/GitHub/"
+global welfare_git = "${github}/welfare_analysis"
 
-global welfare_files = ///
-	"C:/Users/nit518/Opportunity Insights Dropbox/Nicolaj Thor/Children"
+global welfare_files = "C:/Users/hab737/Downloads/dataverse_files/welfare_files"
 
 net sj 5-4 dm88_1
 capture net install dm88_1.pkg // program "NIT" requires "renvars" command
@@ -52,7 +51,7 @@ do "${welfare_git}/wrapper/prepare_corrected_ests.do"
 * 2 - Estimate MVPFs and other statistics, bootstrapping
 *-----------------------------------------------------------------------
 do "${welfare_git}/wrapper/bootstrap_wrapper.do" ///
-										all_programs /// programs to run
+										yearup work_advance /// programs to run
 										all // modes to run
 
 *-----------------------------------------------------------------------

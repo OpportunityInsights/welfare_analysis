@@ -63,8 +63,8 @@ else if regexm("`modes'","robustness") {
 
 *Import relevant programs
 local ado_files 	est_life_impact int_outcome get_tax_rate deflate_to ///
-					cost_of_college get_mother_age convert_rank_dollar ///
-					scalartex
+					cost_of_college get_mother_age convert_rank_dollar
+					// scalartex
 
 foreach ado in `ado_files' {
 	do "${ado_files}/`ado'.ado"

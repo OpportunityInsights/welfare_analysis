@@ -17,7 +17,7 @@ global assumptions "${welfare_files}/MVPF_Calculations/program_assumptions"
 global program_folder "${welfare_git}/programs/functioning"
 global ado_files "${welfare_git}/ado"
 global figtab_code = "${welfare_git}/figtab"
-global data_derived "${welfare_files}/Data/derived"
+global data_derived "${welfare_files}/data/derived"
 global input_data "${welfare_files}/data/inputs"
 global output_root "${welfare_files}/figtab/${version}"
 global scalartex_out "${welfare_files}/Data/scalartex"
@@ -89,14 +89,14 @@ if "$version" == "slides" {
 * Figure I - WTP and Cost Components for Admission to Florida International University
 *--------------------------------------------------
 * A,C - FIU cost/wtp decompositions
-qui include "${figtab_code}/wtp_cost_decompositions.do" 
+qui include "${figtab_code}/wtp_cost_decompositions.do"
 * B- Cost Recovery by Age (FIU costs by age)
 qui include "${figtab_code}/costs_by_age.do"
 
 * Figure II - Medicaid WTP and cost decomposition
 *--------------------------------------------------
 * A,B - Medicaid WTP/Cost decompositions
-//qui include "${figtab_code}/wtp_cost_decompositions.do" 
+//qui include "${figtab_code}/wtp_cost_decompositions.do"
 
 * Figure III - All estimates
 *--------------------------------------------------
@@ -117,9 +117,9 @@ qui include "${figtab_code}/scatter_cost_over_program_cost.do"
 * Figure VII - Sample restrictions
 *--------------------------------------------------
 // panel A
-//qui include "${figtab_code}/scatter_mvpf_age_all_estimates.do" 
+//qui include "${figtab_code}/scatter_mvpf_age_all_estimates.do"
 // panels B, C and D
-qui include "${figtab_code}/scatter_mvpf_age_all_estimates_restrictions.do" 
+qui include "${figtab_code}/scatter_mvpf_age_all_estimates_restrictions.do"
 
 * Figure VIII - Publication Bias
 *--------------------------------------------------
@@ -183,7 +183,7 @@ qui include "${welfare_git}/ci_simulations/vary_c_around_zero.do"
 									APPENDIX TABLES
 ********************************************************************************/
 
-* Table 1 
+* Table 1
 qui include "${welfare_git}/figtab/table_all_programs_studied.do"
 
 * Table 2
@@ -199,4 +199,3 @@ qui include "${welfare_git}/figtab/table_appendix_ui.do"
 
 * College
 qui include "${welfare_git}/figtab/table_appendix_college.do"
-

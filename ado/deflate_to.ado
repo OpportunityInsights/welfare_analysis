@@ -5,11 +5,11 @@
 	DESCRIPTION: Takes as inputs:
 		* Income (specifiy USD year and income year)
 		* Whether transfers are to be included
-		* Whether payroll tax is to be included 
+		* Whether payroll tax is to be included
 		* Whether income is to be forecasted (for child programs)
 		* Age when income is measured  (if forecasting income)
 		* Individual or household earnings (number of children optional)
-		* Number of kids in family 
+		* Number of kids in family
 		
 *Based on:
 Congressional Budget Office, November 2015
@@ -22,20 +22,20 @@ https://www.cbo.gov/sites/default/files/114th-congress-2015-2016/reports/50923-m
 cap program drop deflate_to
 
 * define program
-program define deflate_to, rclass 
+program define deflate_to, rclass
 
 * syntax
 syntax anything(name=to), ///
-	[ /// 
+	[ ///
 	from(real 0) /// year to convert from
 	index /// return the index in the specified year
-	] 
-	
+	]
+
 *-------------------------------------------------------------------------------
 * Check inputs/error messages
 *-------------------------------------------------------------------------------
 
-cap assert "`index'"=="index" | "`from'"!="" 
+cap assert "`index'"=="index" | "`from'"!=""
 if _rc> 0 {
 	di as err "Either specify you want an index or a year to convert from"
 	exit
@@ -276,9 +276,9 @@ if "`index'"=="" {
 
 if "`index'"=="index" {
 	local inf_index = ``series'_`to''
-	
+
 	di "Index `to': `inf_index'"
-	
+
 	return scalar index = `inf_index'
 }
 
@@ -288,11 +288,3 @@ end
 
 deflate_to 1996 , from(1992)
 deflate_to 1990 , index
-
-
-
-
-	
-
-	
-	

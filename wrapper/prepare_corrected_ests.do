@@ -143,9 +143,14 @@ di `count_0_restricted'
 
 
 
-* run the matlab script
+* run the matlab script, creating folders if they do not already exist
+cap mkdir "${causal_ests_corrected}"
+cap mkdir "${causal_ests_corrected}/MLE"
+forval mode = 1/4 {
+	cap mkdir "${causal_ests_corrected}/MLE/mode_`mode'"
+}
 cd "${welfare_git}/pub_bias"
-shell matlab -nodisplay -nosplash -nodesktop -r "selection_welfare('${welfare_git}','${welfare_dropbox}');exit;"
+shell "C:\Program Files\MATLAB\R2018a\bin\matlab.exe" -nodisplay -nosplash -nodesktop -r "selection_welfare('${welfare_git}','${welfare_dropbox}');exit;"
 
 * make sure the script has time to run
 noi di as err "Pausing whilst publication bias script runs in Matlab, please wait for it to finish before continuing"

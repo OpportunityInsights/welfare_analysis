@@ -11,21 +11,38 @@ https://economicmobilitycorp.org/wp-content/uploads/2019/04/NineYearGains_web.pd
 ********************************
 /* 1. Pull Global Assumptions */
 ********************************
-local discount_rate = $discount_rate
+// local discount_rate = $discount_rate
+// assert `discount_rate' != .
+// local tax_rate_assumption = "$tax_rate_assumption" //takes values "continuous", "cbo"
+// assert "`tax_rate_assumption'" != ""
+// if "`tax_rate_assumption'" ==  "continuous" {
+// 	local tax_rate = $tax_rate_cont
+// 	assert "`tax_rate'" != ""
+// }
+// local payroll_assumption = "$payroll_assumption" // "yes" or "no"
+// assert "`payroll_assumption'" != ""
+// local proj_type 	= "$proj_type" //takes values "observed", "growth forecast"
+// assert "`proj_type'" != ""
+// local proj_length 	= "$proj_length" //"observed", "8yr", "21yr", or "age65"
+// assert "`proj_length'" != ""
+// local wtp_valuation = "$wtp_valuation" //takes on value of "post tax" or "cost"
+// assert "`wtp_valuation'" != ""
+
+local discount_rate = 0.03
 assert `discount_rate' != .
-local tax_rate_assumption = "$tax_rate_assumption" //takes values "continuous", "cbo"
+local tax_rate_assumption = "cbo" //takes values "continuous", "cbo"
 assert "`tax_rate_assumption'" != ""
 if "`tax_rate_assumption'" ==  "continuous" {
 	local tax_rate = $tax_rate_cont
 	assert "`tax_rate'" != ""
 }
-local payroll_assumption = "$payroll_assumption" // "yes" or "no"
+local payroll_assumption = "no" // "yes" or "no"
 assert "`payroll_assumption'" != ""
-local proj_type 	= "$proj_type" //takes values "observed", "growth forecast"
+local proj_type 	= "growth forecast" //takes values "observed", "growth forecast"
 assert "`proj_type'" != ""
-local proj_length 	= "$proj_length" //"observed", "8yr", "21yr", or "age65"
+local proj_length 	= "age65" //"observed", "8yr", "21yr", or "age65"
 assert "`proj_length'" != ""
-local wtp_valuation = "$wtp_valuation" //takes on value of "post tax" or "cost"
+local wtp_valuation = "post tax" //takes on value of "post tax" or "cost"
 assert "`wtp_valuation'" != ""
 
 ************************************
@@ -33,37 +50,36 @@ assert "`wtp_valuation'" != ""
 ************************************
 
 *Import estimates from paper, giving option for corrected estimates
-if "`1'" != "" global name = "`1'"
-local bootstrap  = "`2'"
-if "`3'" != "" global folder_name = "`3'"
-if "`bootstrap'" == "yes" {
-	if ${draw_number} ==1 {
-		preserve
-			use "${input_data}/causal_estimates/${folder_name}/draws/${name}.dta", clear
-			qui ds draw_number, not
-			global estimates_${name} = r(varlist)
-			mkmat ${estimates_${name}}, matrix(draws_${name}) rownames(draw_number)
-		restore
-	}
-	local ests ${estimates_${name}}
-	foreach var in `ests' {
-		matrix temp = draws_${name}["${draw_number}", "`var'"]
-		local `var' = temp[1,1]
-	}
-}
-if "`bootstrap'" != "yes" {
-	preserve
-		import delimited "${input_data}/causal_estimates/${folder_name}/${name}.csv", clear
-		levelsof estimate, local(estimates)
-		foreach est in `estimates' {
-			qui su pe if estimate == "`est'"
-			local `est' = r(mean)
-		}
-	restore
-}
+// if "`1'" != "" global name = "`1'"
+// local bootstrap  = "`2'"
+// if "`3'" != "" global folder_name = "`3'"
+// if "`bootstrap'" == "yes" {
+// 	if ${draw_number} ==1 {
+// 		preserve
+// 			use "${input_data}/causal_estimates/${folder_name}/draws/${name}.dta", clear
+// 			qui ds draw_number, not
+// 			global estimates_${name} = r(varlist)
+// 			mkmat ${estimates_${name}}, matrix(draws_${name}) rownames(draw_number)
+// 		restore
+// 	}
+// 	local ests ${estimates_${name}}
+// 	foreach var in `ests' {
+// 		matrix temp = draws_${name}["${draw_number}", "`var'"]
+// 		local `var' = temp[1,1]
+// 	}
+// }
+// if "`bootstrap'" != "yes" {
+// 	preserve
+// 		import delimited "${input_data}/causal_estimates/${folder_name}/${name}.csv", clear
+// 		levelsof estimate, local(estimates)
+// 		foreach est in `estimates' {
+// 			qui su pe if estimate == "`est'"
+// 			local `est' = r(mean)
+// 		}
+// 	restore
+// }
 
 
-/*
 *Earnings impacts for years 1-9 since random assignment. From Figure 1
 
 local year1_earnings = -1801
@@ -75,7 +91,7 @@ local year6_earnings = 4691
 local year7_earnings = 2176
 local year8_earnings = 2952
 local year9_earnings = 5239
-*/
+
 
 ************************************
 /* 2. Exact Inputs from Paper */
@@ -93,7 +109,7 @@ local program_age = 30
 *Total program cost (pg 11)
 // this is the 22% of total cost spent on tuition and the 23% spent on student support
 
-local program_cost = 10501 
+local program_cost = 10501
 local program_transfers = (.22 + .23) * `program_cost'
 
 
@@ -127,7 +143,7 @@ forvalues i = 1/9 {
 }
 
 
-*Earnings projections 
+*Earnings projections
 local proj_start_age = `program_age' + 10
 local year9_age = `program_age' + 9
 local project_year = `program_year' + 10
@@ -210,7 +226,7 @@ if "`wtp_valuation'" == "lower bound" {
 **************************
 
 local MVPF = `WTP'/`total_cost'
-
+local bcr  = (`WTP' + `FE')/(`total_cost' + `FE')
 
 ****************
 /* 8. Outputs */
@@ -218,15 +234,10 @@ local MVPF = `WTP'/`total_cost'
 
 *display outputs
 di `MVPF'
+di `bcr'
 di `WTP'
 di `total_cost'
 di `program_cost'
 di `FE'
 
 di `total_earn_impact'
-
-
-
-
-
-

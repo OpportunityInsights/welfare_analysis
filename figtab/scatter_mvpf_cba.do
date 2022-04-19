@@ -25,12 +25,19 @@ drop if prog_type == "Welfare Reform"
 
 gen to_label = inlist(program,"erta81_s","job_corps","obra93_c","eitc_obra93") | ///
 	inlist(program,"perry_pre_school","mc_83","fiu") | ///
-	strpos(program,"cpc")==1
+	strpos(program,"cpc")==1 | ///
+	inlist(program,"yearup","job_corps","work_advance","nsw_adult_women", "nsw_ex_addict") | ///
+		inlist(program,"nsw_ex_offender", "jobstart", "jtpa_adult", "jtpa_youth")
+// 
+// gen to_label = inlist(program,"yearup","job_corps","work_advance","nsw_adult_women", "nsw_ex_addict") | ///
+// 	inlist(program,"nsw_ex_offender", "jobstart", "jtpa_adult", "jtpa_youth")
 
 drop if prog_type=="Top Taxes" & inlist(program,"obra93_c","erta81_s","egtrra01_h","aca_13_k")==0
 
 *Impose 50% DWL
-replace cbr = cbr/1.5
+local dwl = 0
+local dwl_str = 100*`dwl'
+replace cbr = cbr/(1+`dwl')
 
 replace cbr = -1 if cbr < -1
 preserve
@@ -62,7 +69,7 @@ tw `graph_commands' ///
 	ytitle("BCR") ///
 	$title
 
-graph export "${output}/scatter_mvpf_vs_cba_w_labels_50p_dwl.${img}", replace
+graph export "${output}/scatter_mvpf_vs_cba_w_labels_`dwl_str'p_dwl.${img}", replace
 restore
 list program mvpf cbr if inlist(program,"obra93_c","eitc_obra93")
 
@@ -95,7 +102,7 @@ tw `graph_commands' ///
 	ytitle("BCR") ///
 	$title
 
-graph export "${output}/scatter_mvpf_vs_cba_avg_50p_dwl.${img}", replace
+graph export "${output}/scatter_mvpf_vs_cba_avg_`dwl_str'p_dwl.${img}", replace
 
 
 
